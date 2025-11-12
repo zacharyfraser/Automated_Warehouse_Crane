@@ -1,0 +1,33 @@
+{
+    "configurations": [
+        {
+            "type": "stlinkgdbtarget",
+            "request": "launch",
+            "name": "ST-Link",
+            "cwd": "${workspaceFolder}",
+            "preBuild": "${command:st-stm32-ide-debug-launch.build}",
+            //"runEntry": "main",
+            "imagesAndSymbols": [
+                {
+                    "imageFileName": "${workspaceFolder}/build/Debug/Automated_Warehouse_Crane.elf"
+                }
+            ],
+            "verbose": false,
+            "deviceName": "STM32F411RET6",
+            "deviceCore": "Cortex-M4",
+            "deviceTrustzone": "TZ-disabled",
+            "serverApID": "0",
+            "serverReset": "Connect under reset",
+            "serverInterface": "SWD",
+            "serverInterfaceFrequency": "Auto",
+            "serverShared": false,
+            "serverHaltAllCores": false,
+            "serverHost": "localhost",
+            "serverPort": "61234",
+            "openGdbConsole": false,
+            "faultDivByZero": true,
+            "faultUnalignedAccess": false,
+            "faultHaltOnException": true
+        }
+    ]
+}
