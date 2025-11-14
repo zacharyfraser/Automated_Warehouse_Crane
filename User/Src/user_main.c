@@ -60,6 +60,7 @@ void Debug_Task(void *pvParameters)
     PWM_Duty_Cycle_t pwm_msg;
     while (1)
     {
+        /* Ramp PWM duty cycle up and down */
         pwm_msg.channel = VERTICAL_SERVO_PWM;
         pwm_msg.duty_cycle_percent = duty_cycle;
         xQueueSend(PWM_Queue, &pwm_msg, portMAX_DELAY);
@@ -70,7 +71,7 @@ void Debug_Task(void *pvParameters)
             inc *= -1;
         }
 
-        vTaskDelay(pdMS_TO_TICKS(100)); // Delay for 1 second
+        vTaskDelay(pdMS_TO_TICKS(100)); /* Delay for 100 milliseconds */
     }
     UNUSED(pvParameters);
 }
@@ -82,7 +83,7 @@ void Debug_Task(void *pvParameters)
  */
 void create_queues(void)
 {
-    // Create PWM Queue
+    /* Create PWM Queue */
     PWM_Queue = xQueueCreate(10, sizeof(PWM_Duty_Cycle_t));
 }
 
@@ -113,6 +114,7 @@ void user_main(void)
     osKernelInitialize(); /* Call init function for freertos objects (in cmsis_os2.c) */
     MX_FREERTOS_Init();   /* CubeMX Generated FreeRTOS objects are initialized here */
 
+    /* Create User-made FreeRTOS objects */
     create_queues();
     create_initial_tasks();
 
