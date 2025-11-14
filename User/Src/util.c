@@ -10,7 +10,7 @@
 #include "FreeRTOS.h"
 #include "semphr.h"
 
-#define MAX_RX_BUFFER_LENGTH   40
+#define MAX_RX_BUFFER_LENGTH 40
 
 static SemaphoreHandle_t mutexHandle_print_str;
 extern UART_HandleTypeDef huart2;
@@ -19,7 +19,6 @@ void util_init()
 {
     mutexHandle_print_str = xSemaphoreCreateMutex();
 }
-
 
 static void print_str_local(char *str)
 {
@@ -46,5 +45,3 @@ void print_str_unsafe(char *str)
             ;
     }
 }
-
-

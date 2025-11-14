@@ -8,7 +8,6 @@
 #ifndef INC_USER_UTIL_H_
 #define INC_USER_UTIL_H_
 
-
 // ---------- Initialization ----------
 void util_init();
 
@@ -25,8 +24,8 @@ void print_str_unsafe(char *str);
 // // ---------- HAL Callback when Interrupt fires----------
 // void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 
-void configure_usart_hostPC(void); // Configure Host PC UART and its queue
-void request_hostPC_read(void); // Start UART reception in interrupt mode
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);   // Callback for UART RX Complete Interrupt
+void configure_usart_hostPC(void);                       // Configure Host PC UART and its queue
+void request_hostPC_read(void);                          // Start UART reception in interrupt mode
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart); // Callback for UART RX Complete Interrupt
 
 #endif /* INC_USER_UTIL_H_ */
