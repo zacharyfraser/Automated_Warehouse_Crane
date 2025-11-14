@@ -48,6 +48,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/Src/user_main.c
     User/Src/util.c
     User/Src/L1/USART_Driver.c
+    User/Src/L1/PWM_Driver.c
     User/Src/L2/Comm_Datalink.c
 )
 
@@ -57,6 +58,8 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     User/Inc
     User/Inc/L1
     User/Inc/L2
+    User/Inc/L3
+    User/Inc/L4
 
 )
 

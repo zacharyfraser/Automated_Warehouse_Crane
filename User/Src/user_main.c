@@ -1,26 +1,36 @@
+/**
+ * @file    user_main.c
+ *
+ * @brief   Source file for user_main.c
+ *
+ * Created on: November 11, 2025
+ */
 #include "cmsis_os.h"
 #include "FreeRTOS.h"
 #include "main.h"
 #include "util.h"
 #include <stdio.h>
 #include "queue.h"
+
+/* User Includes */
 #include "L1/USART_Driver.h"
+#include "L1/PWM_Driver.h"
 
 void MX_FREERTOS_Init(void);
 
-/**
- * @brief User main function to initialize and start the RTOS kernel.
- */
+QueueHandle_t PWM_Queue;
 
+/* TODO - Move HostPC_RX_Task() to L1/USART_Driver.c */
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 char main_string[50];
 uint32_t main_counter = 0;
 char value;
 
-/*
- * This task reads the queue of characters from the Host PC when available
+/**
+ * @brief This task reads the queue of characters from the Host PC when available
  * It then sends the processed data to the Sensor Controller Task
  */
-void HostPC_RX_Task()
+void HostPC_RX_Task(void *pvParameters)
 {
 
     configure_usart_hostPC(); // Configure Host PC UART and its queue
@@ -34,31 +44,77 @@ void HostPC_RX_Task()
             sprintf(main_string, "Received from Host PC: %c\r\n", value);
             print_str(main_string);
         }
-        // vTaskDelay(1000/portTICK_RATE_MS);
     }
-    // print_str("Queue contents:\r\n");
+    UNUSED(pvParameters);
+}
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    // while (xQueueReceive(Queue_hostPC_UART, &value, 0) == pdTRUE)
-    // {
-    //     sprintf(main_string,"queue value: %c", value);
-    //     print_str(main_string);
+/**
+ * @brief This task is for debugging purposes
+ * The implementation will be changed as needed
+ */
+void Debug_Task(void *pvParameters)
+{
+    int duty_cycle = 0;
+    int inc = 1;
+    PWM_Duty_Cycle_t pwm_msg;
+    while (1)
+    {
+        pwm_msg.channel = VERTICAL_SERVO_PWM;
+        pwm_msg.duty_cycle_percent = duty_cycle;
+        xQueueSend(PWM_Queue, &pwm_msg, portMAX_DELAY);
 
-    // }
-    // while(1){
-    //  print_str("Main task loop executing\r\n");
-    //  sprintf(main_string,"Main task iteration: 0x%08lx\r\n", main_counter++);
-    //  print_str(main_string);
-    //  vTaskDelay(1000/portTICK_RATE_MS);
-    //  }
+        duty_cycle += inc;
+        if (duty_cycle > 100 || duty_cycle < 0)
+        {
+            inc *= -1;
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(100)); // Delay for 1 second
+    }
+    UNUSED(pvParameters);
 }
 
+/**
+ * @brief Create all inter-task queues
+ *
+ * This function is called from user_main() to create the necessary queues before starting the scheduler.
+ */
+void create_queues(void)
+{
+    // Create PWM Queue
+    PWM_Queue = xQueueCreate(10, sizeof(PWM_Duty_Cycle_t));
+}
+
+/**
+ * @brief Create all initial tasks
+ *
+ * This function is called from user_main() to create the initial tasks before starting the scheduler.
+ */
+void create_initial_tasks(void)
+{
+    /* RX Task to receive communication with Host PC */
+    xTaskCreate(HostPC_RX_Task, "RX_Task", configMINIMAL_STACK_SIZE + 100, NULL,
+                tskIDLE_PRIORITY + 2, NULL);
+    /* Start PWM Timers for servo control */
+    xTaskCreate(PWM_Timer_Task, "PWM_Timer_Task", configMINIMAL_STACK_SIZE + 100, NULL,
+                tskIDLE_PRIORITY + 2, NULL);
+    /* Debug Task */
+    xTaskCreate(Debug_Task, "Debug_Task", configMINIMAL_STACK_SIZE + 100, NULL,
+                tskIDLE_PRIORITY + 1, NULL);
+}
+
+/**
+ * @brief User main function to initialize and start the RTOS kernel.
+ */
 void user_main(void)
 {
     util_init();
     osKernelInitialize(); /* Call init function for freertos objects (in cmsis_os2.c) */
     MX_FREERTOS_Init();   /* CubeMX Generated FreeRTOS objects are initialized here */
 
-    xTaskCreate(HostPC_RX_Task, "Main Task", configMINIMAL_STACK_SIZE + 100, NULL,
-                tskIDLE_PRIORITY + 2, NULL);
+    create_queues();
+    create_initial_tasks();
+
     osKernelStart(); /* Start scheduler */
 }
