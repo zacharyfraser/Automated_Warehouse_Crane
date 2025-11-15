@@ -22,11 +22,9 @@
 uint8_t rx_buffer_extern[MAX_RX_BUFFER_LENGTH];
 uint8_t rx_buffer_hostPC[MAX_RX_BUFFER_LENGTH];
 
-QueueHandle_t Queue_extern_UART;
 QueueHandle_t Queue_hostPC_UART;
 
 extern UART_HandleTypeDef huart2;
-extern UART_HandleTypeDef huart6;
 
 /******************************************************************************
 This triggers a read and the buffer will be filled asynchronously.
