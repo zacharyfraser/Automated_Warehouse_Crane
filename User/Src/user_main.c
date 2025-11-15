@@ -14,6 +14,7 @@
 
 /* User Includes */
 #include "L1/USART_Driver.h"
+#include "L1/PWM_Driver.h"
 #include "user_main.h"
 #include "string.h"
 
@@ -24,9 +25,8 @@ void MX_FREERTOS_Init(void);
  */
 
 char main_string[256];
-// uint32_t main_counter = 0;
-// char value;
 QueueHandle_t Command_Queue;
+QueueHandle_t PWM_Queue;
 
 typedef struct Message
 {
@@ -144,7 +144,7 @@ void Debug_Task1(void *pvParameters)
         }
     }
     UNUSED(pvParameters);
-}      
+}
 /**
  * @brief This task is for debugging purposes
  * The implementation will be changed as needed
@@ -196,8 +196,8 @@ void create_initial_tasks(void)
     /* Start PWM Timers for servo control */
     xTaskCreate(PWM_Timer_Task, "PWM_Timer_Task", configMINIMAL_STACK_SIZE + 100, NULL,
                 tskIDLE_PRIORITY + 2, NULL);
-   /* Start UART string tokenizer */
-   xTaskCreate(Tokenize_Task, "Tokenize Task", configMINIMAL_STACK_SIZE + 100, NULL,
+    /* Start UART string tokenizer */
+    xTaskCreate(Tokenize_Task, "Tokenize Task", configMINIMAL_STACK_SIZE + 100, NULL,
                 tskIDLE_PRIORITY + 2, NULL);
     /* Debug Tasks */
     xTaskCreate(Debug_Task1, "Debug_Task1", configMINIMAL_STACK_SIZE + 100, NULL,
