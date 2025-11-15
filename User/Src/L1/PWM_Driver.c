@@ -18,7 +18,7 @@ extern TIM_HandleTypeDef htim1;
 extern QueueHandle_t PWM_Queue;
 
 /**
- * @brief Initialize PWM timers for servo control
+ * @brief Control PWM timers for servo control
  *
  * Configures PWM timers on TIM1 CH1 and CH2 at 50 Hz
  * Waits for queue messages to update PWM duty cycles
@@ -27,6 +27,7 @@ extern QueueHandle_t PWM_Queue;
 void PWM_Timer_Task(void *pvParameters)
 {
     /* Timer1 is clocked from APB2 @ 84 MHz */
+    /* Make sure external clock from STLink is timer source - HSI has a lot of drift */
 
     /* Maximum Counter period is 65535
      * Prescaler = (Timer clock / Desired counter clock) - 1

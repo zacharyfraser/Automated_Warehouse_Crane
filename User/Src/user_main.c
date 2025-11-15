@@ -66,12 +66,12 @@ void Debug_Task(void *pvParameters)
         xQueueSend(PWM_Queue, &pwm_msg, portMAX_DELAY);
 
         duty_cycle += inc;
-        if (duty_cycle > 100 || duty_cycle < 0)
+        if (duty_cycle > 99 || duty_cycle < 1)
         {
             inc *= -1;
         }
 
-        vTaskDelay(pdMS_TO_TICKS(100)); /* Delay for 100 milliseconds */
+        vTaskDelay(pdMS_TO_TICKS(10)); /* Delay for 100 milliseconds */
     }
     UNUSED(pvParameters);
 }
