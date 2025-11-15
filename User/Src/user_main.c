@@ -55,18 +55,18 @@ void HostPC_RX_Task(void *pvParameters)
  */
 void Debug_Task(void *pvParameters)
 {
-    int duty_cycle = 0;
+    int pulse_width = 0;
     int inc = 1;
     PWM_Duty_Cycle_t pwm_msg;
     while (1)
     {
         /* Ramp PWM duty cycle up and down */
         pwm_msg.channel = VERTICAL_SERVO_PWM;
-        pwm_msg.duty_cycle_percent = duty_cycle;
+        pwm_msg.pulse_width_percent = pulse_width;
         xQueueSend(PWM_Queue, &pwm_msg, portMAX_DELAY);
 
-        duty_cycle += inc;
-        if (duty_cycle > 99 || duty_cycle < 1)
+        pulse_width += inc;
+        if (pulse_width > 99 || pulse_width < 1)
         {
             inc *= -1;
         }

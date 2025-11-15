@@ -18,7 +18,7 @@ typedef enum PWM_CHANNEL
 typedef struct PWM_DUTY_CYCLE
 {
     PWM_Channel_t channel;
-    uint8_t duty_cycle_percent; /* 0 - 100% of full scale servo duty cycle (1 ms to 2 ms pulse width) */
+    uint8_t pulse_width_percent; /* 0 - 100% of full scale servo pulse_width (1 ms to 2 ms pulse width) */
 } PWM_Duty_Cycle_t;
 
 void PWM_Timer_Task(void *pvParameters);

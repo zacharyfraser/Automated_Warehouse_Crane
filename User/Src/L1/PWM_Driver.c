@@ -54,20 +54,24 @@ void PWM_Timer_Task(void *pvParameters)
 
         if (xQueueReceive(PWM_Queue, &pwm_msg, portMAX_DELAY) == pdTRUE)
         {
-            if (pwm_msg.duty_cycle_percent > 100)
+            if (pwm_msg.pulse_width_percent > 99)
             {
-                pwm_msg.duty_cycle_percent = 100; // Cap at 100%
+                pwm_msg.pulse_width_percent = 99; // Cap at 99%
+            }
+            else if (pwm_msg.pulse_width_percent < 1)
+            {
+                pwm_msg.pulse_width_percent = 1; // Cap at 1%
             }
 
             /* Scale duty cycle percent to timer pulse length from 1 to 2 ms */
-            uint32_t pulse_length = 1000 + (pwm_msg.duty_cycle_percent * 10); // 1 ms to 2 ms
+            uint32_t pulse_width = 1000 + (pwm_msg.pulse_width_percent * 10); // 1 ms to 2 ms
             if (pwm_msg.channel == VERTICAL_SERVO_PWM)
             {
-                __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, pulse_length);
+                __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, pulse_width);
             }
             else if (pwm_msg.channel == HORIZONTAL_SERVO_PWM)
             {
-                __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, pulse_length);
+                __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, pulse_width);
             }
         }
     }
