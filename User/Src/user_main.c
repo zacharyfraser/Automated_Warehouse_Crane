@@ -206,6 +206,8 @@ void create_initial_tasks(void)
                 tskIDLE_PRIORITY + 1, NULL);
 }
 
+
+// testing ultrasonic task
 /**
  * @brief User main function to initialize and start the RTOS kernel.
  */
