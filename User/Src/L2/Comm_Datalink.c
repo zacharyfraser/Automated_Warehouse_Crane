@@ -2,7 +2,7 @@
  * @file Comm_Datalink.c
  *
  * @brief Tokenizes incoming UART data from Host PC into commands and arguments.
- * Packages system data into strings for transmission back to Host PC.
+ * TODO: Packages system data into strings for transmission back to Host PC.
  */
 
 /* Module Header */

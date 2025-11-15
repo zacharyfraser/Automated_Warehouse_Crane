@@ -18,6 +18,10 @@
 extern QueueHandle_t Command_Queue;
 extern QueueHandle_t PWM_Queue;
 
+#define DEBUG1
+// #define DEBUG2
+
+#ifdef DEBUG1
 /**
  * @brief Debug task to print received commands and arguments
  */
@@ -44,7 +48,9 @@ void Debug_Task1(void *pvParameters)
     }
     UNUSED(pvParameters);
 }
+#endif
 
+#ifdef DEBUG2
 /**
  * @brief Debug task to ramp PWM duty cycle for testing
  */
@@ -70,3 +76,4 @@ void Debug_Task2(void *pvParameters)
     }
     UNUSED(pvParameters);
 }
+#endif
