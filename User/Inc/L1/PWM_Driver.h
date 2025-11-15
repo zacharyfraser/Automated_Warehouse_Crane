@@ -9,6 +9,8 @@
 #ifndef PWM_DRIVER_H
 #define PWM_DRIVER_H
 
+#include <stdint.h>
+
 typedef enum PWM_CHANNEL
 {
     VERTICAL_SERVO_PWM = 1,

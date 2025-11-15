@@ -6,16 +6,16 @@
  * Created on: November 13, 2025
  */
 
-#include <stdbool.h>
-
-#include "FreeRTOS.h"
-#include "task.h"
-#include "queue.h"
-#include "main.h"
+/* Module Header */
 #include "L1/PWM_Driver.h"
 
+/* Standard Libraries */
+
+/* User Libraries */
+#include "user_main.h"
+
 extern TIM_HandleTypeDef htim1;
-extern QueueHandle_t PWM_Queue;
+QueueHandle_t PWM_Queue;
 
 /**
  * @brief Control PWM timers for servo control

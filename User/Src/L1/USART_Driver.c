@@ -5,66 +5,64 @@
  *      Author: Andre Hendricks / Dr. JF Bousquet
  */
 
+/* Module Header */
+#include "L1/USART_Driver.h"
+
+/* Standard Libraries*/
 #include <string.h>
 
-#include "main.h"
-#include "USART_Driver.h"
-
-// Required FreeRTOS header files
-#include "FreeRTOS.h"
-#include "queue.h"
-#include "semphr.h"
+/* User Libraries */
+#include "user_main.h"
 
 #define MAX_RX_BUFFER_LENGTH 40
 
 uint8_t rx_buffer_extern[MAX_RX_BUFFER_LENGTH];
 uint8_t rx_buffer_hostPC[MAX_RX_BUFFER_LENGTH];
 
+extern UART_HandleTypeDef huart2;
 QueueHandle_t Queue_hostPC_UART;
 
-extern UART_HandleTypeDef huart2;
-
-/******************************************************************************
-This triggers a read and the buffer will be filled asynchronously.
-******************************************************************************/
+/**
+ * @brief Starts UART receive interrupt for Host PC UART
+ */
 void request_hostPC_read(void)
 {
-	HAL_UART_Receive_IT(&huart2, rx_buffer_hostPC, 1); // Read 1 byte in interrupt mode
+	HAL_UART_Receive_IT(&huart2, rx_buffer_hostPC, 1); /* Read 1 byte in interrupt mode */
 }
 
-/******************************************************************************
-Configures the external USART.
-******************************************************************************/
-void configure_usart_hostPC(void)
-{
-	// Start interrupt for Host PC UART
-	request_hostPC_read();
-
-	// a queue will be filled by the Host PC UART
-	Queue_hostPC_UART = xQueueCreate(80, sizeof(uint8_t));
-}
-
-/******************************************************************************
-******************************************************************************/
+/**
+ * @brief UART RX Complete Callback
+ */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
-	BaseType_t xStatus = pdFAIL; // status from queue operation
+	BaseType_t xStatus = pdFAIL; /* status from queue operation */
 
-	// Toggle onboard LED
+	/* Toggle onboard LED */
 	HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 
 	if (huart == &huart2)
-	{ // Handle Host PC RX UART
-		// fill the queue one character at a time
+	{
+		/* Fill the queue one character at a time */
 		xStatus = xQueueSendToBackFromISR(Queue_hostPC_UART, rx_buffer_hostPC, 0);
 
-		// Request UART Interrupt Rx
+		/* Request next character */
 		request_hostPC_read();
 	}
 
 	if (xStatus == pdPASS)
 	{
-		// Toggle onboard LED
+		/* Toggle onboard LED to indicate successful RX */
 		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 	}
+}
+
+/*
+ * @brief Task to initiate Host PC UART RX
+ */
+void HostPC_RX_Task(void *pvParameters)
+{
+
+	request_hostPC_read(); /* Start the first read */
+	vTaskDelete(NULL);	   /* Delete this task as it is no longer needed */
+	UNUSED(pvParameters);
 }

@@ -3,28 +3,23 @@
  *
  * @brief   Header file for user_main.c
  *
+ * Includes declarations for global FreeRTOS objects and default includes for all user files.
+ *
  * Created on: November 11, 2025
  */
 
 #ifndef USER_MAIN_H
 #define USER_MAIN_H
 
-#include "FreeRTOS.h"
-#include "queue.h"
+#include <stdbool.h>
+#include <stdint.h>
 
-extern QueueHandle_t Command_Queue;
-
-typedef enum PC_COMMANDS
-{
-    CMD_CHANGE_MODE = 0,
-}PC_Commands_t;
-
-typedef enum MODE_TYPES
-{
-    MODE_CALI = 0,
-    MODE_MANU = 1,
-    MODE_AUTO = 2,
-}Mode_Types_t;
+#include "FreeRTOS.h" /* FreeRTOS kernal */
+#include "task.h"     /* FreeRTOS task functions */
+#include "queue.h"    /* FreeRTOS queue functions */
+#include "semphr.h"   /* FreeRTOS semaphore functions */
+#include "main.h"     /* Hal and Object Handles */
+#include "util.h"     /* Print Functions */
 
 void user_main(void);
 
