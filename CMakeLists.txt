@@ -51,6 +51,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/Src/L1/USART_Driver.c
     User/Src/L1/PWM_Driver.c
     User/Src/L2/Comm_Datalink.c
+    User/Src/L3/Command_Dispatch.c
 )
 
 # Add include paths

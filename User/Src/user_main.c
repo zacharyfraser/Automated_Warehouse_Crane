@@ -16,6 +16,7 @@
 #include "L1/USART_Driver.h"
 #include "L1/PWM_Driver.h"
 #include "L2/Comm_Datalink.h"
+#include "L3/Command_Dispatch.h"
 
 extern QueueHandle_t PWM_Queue;
 extern QueueHandle_t Command_Queue;
@@ -70,6 +71,9 @@ void create_initial_tasks(void)
                 tskIDLE_PRIORITY + 2, NULL);
     /* Start UART string tokenizer */
     xTaskCreate(Tokenize_Task, "Tokenize Task", configMINIMAL_STACK_SIZE + 100, NULL,
+                tskIDLE_PRIORITY + 2, NULL);
+    /* Command Dispatch Task */
+    xTaskCreate(Command_Dispatch_Task, "Command Dispatch Task", configMINIMAL_STACK_SIZE + 200, NULL,
                 tskIDLE_PRIORITY + 2, NULL);
     /* Debug Tasks */
     xTaskCreate(Debug_Task1, "Debug_Task1", configMINIMAL_STACK_SIZE + 100, NULL,

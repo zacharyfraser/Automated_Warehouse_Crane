@@ -10,6 +10,7 @@
 
 /* Standard Libraries */
 #include <string.h>
+#include <ctype.h>
 
 /* User Libraries */
 #include "user_main.h"
@@ -76,7 +77,7 @@ void Tokenize_Task(void *pvParameters)
                 break;
 
             default:
-                parse_storage[counter] = value; // Store received character
+                parse_storage[counter] = tolower(value); // Store received character as lowercase
                 counter += 1;
             }
         }

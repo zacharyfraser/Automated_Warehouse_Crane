@@ -18,12 +18,12 @@
 extern QueueHandle_t Command_Queue;
 extern QueueHandle_t PWM_Queue;
 
-#define DEBUG1
+// #define DEBUG1
 // #define DEBUG2
 
 #ifdef DEBUG1
 /**
- * @brief Debug task to print received commands and arguments
+ * @brief Debug task to print received commands and arguments.  Will not work if higher priority task reading from Command_Queue.
  */
 void Debug_Task1(void *pvParameters)
 {
@@ -45,6 +45,15 @@ void Debug_Task1(void *pvParameters)
                 print_str(main_string);
             }
         }
+    }
+    UNUSED(pvParameters);
+}
+#else
+void Debug_Task1(void *pvParameters)
+{
+    while (1)
+    {
+        vTaskDelete(NULL);
     }
     UNUSED(pvParameters);
 }
@@ -73,6 +82,15 @@ void Debug_Task2(void *pvParameters)
         }
 
         vTaskDelay(pdMS_TO_TICKS(10)); /* Delay for 100 milliseconds */
+    }
+    UNUSED(pvParameters);
+}
+#else
+void Debug_Task2(void *pvParameters)
+{
+    while (1)
+    {
+        vTaskDelete(NULL);
     }
     UNUSED(pvParameters);
 }
