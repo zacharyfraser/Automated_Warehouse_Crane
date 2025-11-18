@@ -15,7 +15,7 @@
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim4;
-QueueHandle_t Ultrasonic_Raw_Queue;
+QueueHandle_t Raw_Ultrasonic_Queue;
 
 /**
  * @brief Task to send trigger pulses and measure echo durations from ultrasonic sensors.
@@ -52,7 +52,7 @@ void Ultrasonic_Read_Task(void *pvParameters)
         distance_mm = (pulse_width_us * 343) / 2000; // divide by 2 for round-trip
 
         /* Send distance to queue */
-        xQueueSend(Ultrasonic_Raw_Queue, &distance_mm, portMAX_DELAY);
+        xQueueSend(Raw_Ultrasonic_Queue, &distance_mm, portMAX_DELAY);
     }
 
     UNUSED(pvParameters);

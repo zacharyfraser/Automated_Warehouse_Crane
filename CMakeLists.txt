@@ -52,6 +52,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/Src/L1/PWM_Driver.c
     User/Src/L1/Ultrasonic_Driver.c
     User/Src/L2/Comm_Datalink.c
+    User/Src/L2/Sensor_Filter.c
     User/Src/L3/Command_Dispatch.c
 )
 

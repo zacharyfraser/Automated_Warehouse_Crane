@@ -17,11 +17,13 @@
 
 extern QueueHandle_t Command_Queue;
 extern QueueHandle_t PWM_Queue;
-extern QueueHandle_t Ultrasonic_Raw_Queue;
+extern QueueHandle_t Raw_Ultrasonic_Queue;
+extern QueueHandle_t Filtered_Ultrasonic_Queue;
 
 // #define DEBUG1
 // #define DEBUG2
-#define DEBUG3
+// #define DEBUG3
+#define DEBUG4
 
 #ifdef DEBUG1
 /**
@@ -101,7 +103,7 @@ void Debug_Task2(void *pvParameters)
 #ifdef DEBUG3
 
 /**
- * @brief Debug task to read ultrasonic sensor distances and print them.
+ * @brief Debug task to read raw ultrasonic sensor distances and print them.
  */
 void Debug_Task3(void *pvParameters)
 {
@@ -111,7 +113,7 @@ void Debug_Task3(void *pvParameters)
     while (1)
     {
         /* Read distance from Ultrasonic Queue */
-        if (xQueueReceive(Ultrasonic_Raw_Queue, &distance_mm, portMAX_DELAY) == pdTRUE)
+        if (xQueueReceive(Raw_Ultrasonic_Queue, &distance_mm, portMAX_DELAY) == pdTRUE)
         {
             /* Print the distance */
             sprintf(debug_string, "Ultrasonic Distance: %lu mm\r\n", (unsigned long)distance_mm);
@@ -123,6 +125,40 @@ void Debug_Task3(void *pvParameters)
 }
 #else
 void Debug_Task3(void *pvParameters)
+{
+    while (1)
+    {
+        vTaskDelete(NULL);
+    }
+    UNUSED(pvParameters);
+}
+#endif
+
+#ifdef DEBUG4
+
+/**
+ * @brief Debug task to read filtered ultrasonic sensor distances and print them.
+ */
+void Debug_Task4(void *pvParameters)
+{
+    uint32_t distance_mm;
+    char debug_string[64];
+
+    while (1)
+    {
+        /* Read distance from Ultrasonic Queue */
+        if (xQueueReceive(Filtered_Ultrasonic_Queue, &distance_mm, portMAX_DELAY) == pdTRUE)
+        {
+            /* Print the distance */
+            sprintf(debug_string, "Ultrasonic Distance: %lu mm\r\n", (unsigned long)distance_mm);
+            print_str(debug_string);
+        }
+    }
+
+    UNUSED(pvParameters);
+}
+#else
+void Debug_Task4(void *pvParameters)
 {
     while (1)
     {
