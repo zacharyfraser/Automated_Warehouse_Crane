@@ -41,6 +41,8 @@ void Ultrasonic_Read_Task(void *pvParameters)
 
     while (true)
     {
+        /* Get Wake Time */
+        TickType_t xLastWakeTime = xTaskGetTickCount();
         xSemaphoreTake(Ultrasonic_Echo_Semaphore, 0); /* Clear Semaphore */
         /* Reset Echo Timer */
         HAL_TIM_PWM_Start_IT(&htim3, TIM_CHANNEL_1);
@@ -70,6 +72,8 @@ void Ultrasonic_Read_Task(void *pvParameters)
             HAL_TIM_IC_Stop_IT(&htim3, TIM_CHANNEL_2);
         }
 
+        /* Wait for next sample period */
+        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(100));
         UNUSED(pvParameters);
     }
 }

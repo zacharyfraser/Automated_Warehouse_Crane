@@ -14,6 +14,8 @@
 /* User Libraries */
 #include "user_main.h"
 
+#define PULSE_WIDTH_OFFSET 1500 /* 1.5 ms pulse width center */
+
 extern TIM_HandleTypeDef htim1;
 QueueHandle_t PWM_Queue;
 
@@ -54,17 +56,17 @@ void PWM_Timer_Task(void *pvParameters)
 
         if (xQueueReceive(PWM_Queue, &pwm_msg, portMAX_DELAY) == pdTRUE)
         {
-            if (pwm_msg.pulse_width_percent > 99)
+            if (pwm_msg.pulse_width > 499)
             {
-                pwm_msg.pulse_width_percent = 99; // Cap at 99%
+                pwm_msg.pulse_width = 499; /* Cap at 1.999 ms */
             }
-            else if (pwm_msg.pulse_width_percent < 1)
+            else if (pwm_msg.pulse_width < -499)
             {
-                pwm_msg.pulse_width_percent = 1; // Cap at 1%
+                pwm_msg.pulse_width = -499; /* Cap at 1.001 ms */
             }
 
             /* Scale duty cycle percent to timer pulse length from 1 to 2 ms */
-            uint32_t pulse_width = 1000 + (pwm_msg.pulse_width_percent * 10); // 1 ms to 2 ms
+            uint32_t pulse_width = PULSE_WIDTH_OFFSET + (pwm_msg.pulse_width); /* Centre pulse width between 1 and 2 ms */
             if (pwm_msg.channel == VERTICAL_SERVO_PWM)
             {
                 __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, pulse_width);

@@ -54,6 +54,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/Src/L2/Comm_Datalink.c
     User/Src/L2/Sensor_Filter.c
     User/Src/L3/Command_Dispatch.c
+    User/Src/L3/Control_Loop.c
 )
 
 # Add include paths
