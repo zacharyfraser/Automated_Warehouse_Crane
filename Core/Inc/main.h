@@ -59,12 +59,16 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define B1_Pin GPIO_PIN_13
 #define B1_GPIO_Port GPIOC
+#define ULTRASONIC_TRIGGER_Pin GPIO_PIN_0
+#define ULTRASONIC_TRIGGER_GPIO_Port GPIOA
 #define USART_TX_Pin GPIO_PIN_2
 #define USART_TX_GPIO_Port GPIOA
 #define USART_RX_Pin GPIO_PIN_3
 #define USART_RX_GPIO_Port GPIOA
 #define LD2_Pin GPIO_PIN_5
 #define LD2_GPIO_Port GPIOA
+#define ULTRASONIC_ECHO_Pin GPIO_PIN_6
+#define ULTRASONIC_ECHO_GPIO_Port GPIOA
 #define VERTICAL_SERVO_PWM_Pin GPIO_PIN_8
 #define VERTICAL_SERVO_PWM_GPIO_Port GPIOA
 #define HORIZONTAL_SERVO_PWM_Pin GPIO_PIN_9

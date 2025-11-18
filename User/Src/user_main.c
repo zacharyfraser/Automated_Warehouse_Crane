@@ -15,12 +15,14 @@
 #include "Debug.h"
 #include "L1/USART_Driver.h"
 #include "L1/PWM_Driver.h"
+#include "L1/Ultrasonic_Driver.h"
 #include "L2/Comm_Datalink.h"
 #include "L3/Command_Dispatch.h"
 
 extern QueueHandle_t PWM_Queue;
 extern QueueHandle_t Command_Queue;
 extern QueueHandle_t Queue_hostPC_UART;
+extern QueueHandle_t Ultrasonic_Raw_Queue;
 
 /* Local function prototypes */
 void create_queues(void);
@@ -54,6 +56,8 @@ void create_queues(void)
     Command_Queue = xQueueCreate(10, sizeof(Message_t));
     /* Queue for Host PC UART characters*/
     Queue_hostPC_UART = xQueueCreate(80, sizeof(uint8_t));
+    /* Queue for Ultrasonic sensor readings */
+    Ultrasonic_Raw_Queue = xQueueCreate(10, sizeof(uint32_t));
 }
 
 /**
@@ -69,6 +73,9 @@ void create_initial_tasks(void)
     /* Start PWM Timers for servo control */
     xTaskCreate(PWM_Timer_Task, "PWM_Timer_Task", configMINIMAL_STACK_SIZE + 100, NULL,
                 tskIDLE_PRIORITY + 2, NULL);
+    /* Start Ultrasonic Sensor Read Task */
+    xTaskCreate(Ultrasonic_Read_Task, "Ultrasonic_Read_Task", configMINIMAL_STACK_SIZE + 100, NULL,
+                tskIDLE_PRIORITY + 2, NULL);
     /* Start UART string tokenizer */
     xTaskCreate(Tokenize_Task, "Tokenize Task", configMINIMAL_STACK_SIZE + 100, NULL,
                 tskIDLE_PRIORITY + 2, NULL);
@@ -78,6 +85,8 @@ void create_initial_tasks(void)
     /* Debug Tasks */
     xTaskCreate(Debug_Task1, "Debug_Task1", configMINIMAL_STACK_SIZE + 100, NULL,
                 tskIDLE_PRIORITY + 1, NULL);
-    xTaskCreate(Debug_Task1, "Debug_Task2", configMINIMAL_STACK_SIZE + 100, NULL,
+    xTaskCreate(Debug_Task2, "Debug_Task2", configMINIMAL_STACK_SIZE + 100, NULL,
+                tskIDLE_PRIORITY + 1, NULL);
+    xTaskCreate(Debug_Task3, "Debug_Task3", configMINIMAL_STACK_SIZE + 100, NULL,
                 tskIDLE_PRIORITY + 1, NULL);
 }
