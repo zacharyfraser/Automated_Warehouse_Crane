@@ -22,7 +22,7 @@ extern QueueHandle_t Filtered_Ultrasonic_Queue;
 extern QueueHandle_t PWM_Queue;
 QueueHandle_t Motor_Setpoint_Queue;
 
-static uint32_t vertical_position_setpoint_mm = 0;
+static int32_t vertical_position_setpoint_mm = 128;
 
 #define PWM_MAX 500.0f  /* Max pulse width adjustment for PWM (in microseconds) */
 #define PWM_MIN -500.0f /* Min pulse width adjustment for PWM (in microseconds) */
@@ -64,11 +64,11 @@ void Update_Motor_Setpoint_Task(void *pvParameters)
 void Control_Loop_Task(void *pvParameters)
 {
     PID_Controller_t vertical_pid = {
-        .Kp = 1.0f, .Ki = 0.0f, .Kd = 0.0f, .previous_error = 0.0f, .integral = 0.0f};
+        .Kp = 5.0f, .Ki = 0.5f, .Kd = 0.05f, .previous_error = 0.0f, .integral = 0.0f};
 
     while (1)
     {
-        uint32_t current_position_mm;
+        int32_t current_position_mm;
         /* Read filtered ultrasonic distance */
         if (xQueueReceive(Filtered_Ultrasonic_Queue, &current_position_mm, pdMS_TO_TICKS(ULTRASONIC_SAMPLE_RATE_MS)) == pdTRUE)
         {
@@ -80,7 +80,7 @@ void Control_Loop_Task(void *pvParameters)
             pwm_msg.channel = VERTICAL_SERVO_PWM;
             pwm_msg.pulse_width = (int16_t)control_output; /* Control output directly maps to pulse width adjustment */
             char debug_string[64];
-            sprintf(debug_string, "Control Output: %.2f us\r\n", control_output);
+            sprintf(debug_string, "Control Output: %d us\r\n", (int)control_output);
             print_str(debug_string);
             /* Send PWM command */
             xQueueSend(PWM_Queue, &pwm_msg, portMAX_DELAY);
