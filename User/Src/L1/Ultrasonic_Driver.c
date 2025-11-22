@@ -18,7 +18,6 @@
 
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
-extern TIM_HandleTypeDef htim4;
 QueueHandle_t Raw_Ultrasonic_Queue;
 static SemaphoreHandle_t Ultrasonic_Echo_Semaphore;
 

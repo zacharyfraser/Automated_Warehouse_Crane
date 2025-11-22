@@ -20,7 +20,7 @@ typedef enum PWM_CHANNEL
 typedef struct PWM_DUTY_CYCLE
 {
     PWM_Channel_t channel;
-    int16_t pulse_width; /* -1000 to 1000 maps to full scale servo pulse_width (1 ms to 2 ms pulse width) */
+    int16_t pulse_width; /* -500 to 500 maps to full scale servo pulse_width (1 ms to 2 ms pulse width) */
 } PWM_Duty_Cycle_t;
 
 void PWM_Timer_Task(void *pvParameters);

@@ -18,18 +18,19 @@
 #include "user_main.h"
 #include "L1/PWM_Driver.h"
 
-extern QueueHandle_t Filtered_Ultrasonic_Queue;
-extern QueueHandle_t PWM_Queue;
-QueueHandle_t Motor_Setpoint_Queue;
-
-static int32_t vertical_position_setpoint_mm = 128;
-
 #define PWM_MAX 500.0f  /* Max pulse width adjustment for PWM (in microseconds) */
 #define PWM_MIN -500.0f /* Min pulse width adjustment for PWM (in microseconds) */
 
 #define PID_ANTI_WINDUP_LIMIT 150.0f
 
 #define ULTRASONIC_SAMPLE_RATE_MS 100
+#define STARTUP_SETPOINT_MM 50
+
+extern QueueHandle_t Filtered_Ultrasonic_Queue;
+extern QueueHandle_t PWM_Queue;
+QueueHandle_t Motor_Setpoint_Queue;
+
+static int32_t vertical_position_setpoint_mm = STARTUP_SETPOINT_MM;
 
 typedef struct
 {
@@ -40,7 +41,7 @@ typedef struct
     float integral;
 } PID_Controller_t;
 
-float PID_Compute(PID_Controller_t *pid, float error, float dT);
+static float PID_Compute(PID_Controller_t *pid, float error, float dT);
 
 /**
  * @brief Task to update desired motor setpoint from queue.
@@ -64,7 +65,7 @@ void Update_Motor_Setpoint_Task(void *pvParameters)
 void Control_Loop_Task(void *pvParameters)
 {
     PID_Controller_t vertical_pid = {
-        .Kp = 5.0f, .Ki = 0.5f, .Kd = 0.05f, .previous_error = 0.0f, .integral = 0.0f};
+        .Kp = -1.0f, .Ki = -0.1f, .Kd = 0.0f, .previous_error = 0.0f, .integral = 0.0f};
 
     while (1)
     {
@@ -97,7 +98,7 @@ void Control_Loop_Task(void *pvParameters)
  * @param measured Current measured value
  * @return Control output
  */
-float PID_Compute(PID_Controller_t *pid, float error, float dT)
+static float PID_Compute(PID_Controller_t *pid, float error, float dT)
 {
     float proportional;
     float derivative;
