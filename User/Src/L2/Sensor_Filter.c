@@ -14,6 +14,7 @@
 
 #define MEDIAN_WINDOW_SIZE 3
 #define ALPHA 160 /* Alpha value in Q8 form */
+#define Q8_SCALE_FACTOR 256
 
 /* Median filter buffer */
 static uint32_t median_buffer[MEDIAN_WINDOW_SIZE];
@@ -57,7 +58,7 @@ static uint32_t median_of_3(uint16_t a, uint16_t b, uint16_t c)
  */
 static uint32_t lowpass(uint16_t sample)
 {
-    lowpass_filtered = (ALPHA * sample + (256 - ALPHA) * lowpass_filtered) >> 8;
+    lowpass_filtered = (ALPHA * sample + (Q8_SCALE_FACTOR - ALPHA) * lowpass_filtered) >> 8;
     return lowpass_filtered;
 }
 

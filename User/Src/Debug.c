@@ -23,7 +23,7 @@ extern QueueHandle_t Filtered_Ultrasonic_Queue;
 // #define DEBUG1
 // #define DEBUG2
 // #define DEBUG3
-#define DEBUG4
+// #define DEBUG4
 
 #ifdef DEBUG1
 /**
@@ -57,7 +57,7 @@ void Debug_Task1(void *pvParameters)
 {
     while (1)
     {
-        vTaskDelete(NULL);
+        vTaskDelay(portMAX_DELAY);
     }
     UNUSED(pvParameters);
 }
@@ -94,7 +94,7 @@ void Debug_Task2(void *pvParameters)
 {
     while (1)
     {
-        vTaskDelete(NULL);
+        vTaskDelay(portMAX_DELAY);
     }
     UNUSED(pvParameters);
 }
@@ -128,7 +128,7 @@ void Debug_Task3(void *pvParameters)
 {
     while (1)
     {
-        vTaskDelete(NULL);
+        vTaskDelay(portMAX_DELAY);
     }
     UNUSED(pvParameters);
 }
@@ -162,7 +162,28 @@ void Debug_Task4(void *pvParameters)
 {
     while (1)
     {
-        vTaskDelete(NULL);
+        vTaskDelay(portMAX_DELAY);
+    }
+    UNUSED(pvParameters);
+}
+#endif
+
+#ifdef DEBUG5
+
+/**
+ * @brief Debug task
+ */
+void Debug_Task5(void *pvParameters)
+{
+
+    UNUSED(pvParameters);
+}
+#else
+void Debug_Task5(void *pvParameters)
+{
+    while (1)
+    {
+        vTaskDelay(portMAX_DELAY);
     }
     UNUSED(pvParameters);
 }

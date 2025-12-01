@@ -19,12 +19,14 @@
 #include "L2/Comm_Datalink.h"
 #include "L2/Sensor_Filter.h"
 #include "L3/Command_Dispatch.h"
+#include "L3/Control_Loop.h"
 
 extern QueueHandle_t PWM_Queue;
 extern QueueHandle_t Command_Queue;
 extern QueueHandle_t Queue_hostPC_UART;
 extern QueueHandle_t Raw_Ultrasonic_Queue;
 extern QueueHandle_t Filtered_Ultrasonic_Queue;
+extern QueueHandle_t Motor_Setpoint_Queue;
 
 /* Local function prototypes */
 void create_queues(void);
@@ -62,6 +64,8 @@ void create_queues(void)
     Raw_Ultrasonic_Queue = xQueueCreate(10, sizeof(uint32_t));
     /* Queue for Filtered Ultrasonic sensor readings */
     Filtered_Ultrasonic_Queue = xQueueCreate(10, sizeof(uint32_t));
+    /* Queue for Motor Setpoints */
+    Motor_Setpoint_Queue = xQueueCreate(10, sizeof(uint32_t));
 }
 
 /**
@@ -88,6 +92,11 @@ void create_initial_tasks(void)
                 tskIDLE_PRIORITY + 2, NULL);
     /* Command Dispatch Task */
     xTaskCreate(Command_Dispatch_Task, "Command Dispatch Task", configMINIMAL_STACK_SIZE + 200, NULL,
+                tskIDLE_PRIORITY + 2, NULL);
+    /* Motor Control Loop Tasks */
+    xTaskCreate(Update_Motor_Setpoint_Task, "Update Motor Setpoint Task", configMINIMAL_STACK_SIZE + 100, NULL,
+                tskIDLE_PRIORITY + 2, NULL);
+    xTaskCreate(Control_Loop_Task, "Control Loop Task", configMINIMAL_STACK_SIZE + 300, NULL,
                 tskIDLE_PRIORITY + 2, NULL);
     /* Debug Tasks */
     xTaskCreate(Debug_Task1, "Debug_Task1", configMINIMAL_STACK_SIZE + 100, NULL,

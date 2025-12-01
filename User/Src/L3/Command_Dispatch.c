@@ -16,7 +16,7 @@
 
 extern QueueHandle_t Command_Queue;
 
-void change_mode_handler(char arguments[6][16], uint8_t arg_count);
+static void change_mode_handler(char arguments[6][16], uint8_t arg_count);
 
 /* Command Entry Structure */
 typedef struct COMMAND_ENTRY
@@ -65,7 +65,7 @@ void Command_Dispatch_Task(void *pvParameters)
  * @param arguments Array of argument strings.
  * @param arg_count Number of arguments provided.
  */
-void change_mode_handler(char arguments[6][16], uint8_t arg_count)
+static void change_mode_handler(char arguments[6][16], uint8_t arg_count)
 {
     if (arg_count < 1)
     {
