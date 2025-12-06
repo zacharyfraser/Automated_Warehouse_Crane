@@ -9,15 +9,17 @@
 
 /* Standard Libraries */
 #include <string.h>
+#include <stdlib.h>
 
 /* User Defined Libraries */
 #include "user_main.h"
 #include "L2/Comm_Datalink.h"
+#include "L3/Control_Loop.h"
 
 extern QueueHandle_t Command_Queue;
 
 static void change_mode_handler(char arguments[6][16], uint8_t arg_count);
-
+static void set_setpoint_handler(char arguments[6][16], uint8_t arg_count);
 /* Command Entry Structure */
 typedef struct COMMAND_ENTRY
 {
@@ -27,8 +29,7 @@ typedef struct COMMAND_ENTRY
 
 /* Command Table */
 Command_Entry_t Command_Table[] = {
-    {"change_mode", change_mode_handler},
-};
+    {"change_mode", change_mode_handler}, {"set_height", set_setpoint_handler}};
 
 /**
  * @brief Task to handle PC commands and dispatch them to appropriate modules.
@@ -55,6 +56,24 @@ void Command_Dispatch_Task(void *pvParameters)
     }
 
     UNUSED(pvParameters);
+}
+
+/**
+ * @brief Handler for the "set_setpoint" command.
+ *
+ * Sets the vertical position setpoint for the motor control loop.
+ * @param arguments Array of argument strings.
+ * @param arg_count Number of arguments provided.
+ */
+static void set_setpoint_handler(char arguments[6][16], uint8_t arg_count)
+{
+    if (arg_count < 1)
+    {
+        return;
+    }
+
+    int32_t new_setpoint = atoi(arguments[0]);
+    Set_Setpoint(new_setpoint);
 }
 
 /**
