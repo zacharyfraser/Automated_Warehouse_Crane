@@ -88,7 +88,7 @@ void Control_Loop_Task(void *pvParameters)
             /* Prepare PWM message */
             PWM_Duty_Cycle_t pwm_msg;
             pwm_msg.channel = VERTICAL_SERVO_PWM;
-            pwm_msg.pulse_width = (int16_t)control_output; /* Control output directly maps to pulse width adjustment */
+            pwm_msg.duty_cycle = (int16_t)control_output; /* Control output directly maps to pulse width adjustment */
             sprintf(debug_string, "Control Output: %d us\r\n", (int)control_output);
             print_str(debug_string);
             /* Send PWM command */

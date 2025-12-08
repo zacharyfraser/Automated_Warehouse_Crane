@@ -14,10 +14,36 @@
 /* User Libraries */
 #include "user_main.h"
 
-#define PULSE_WIDTH_OFFSET 1500 /* 1.5 ms pulse width center */
+#define IDLE_PULSE_WIDTH_US 1500
+#define FORWARD_PULSE_WIDTH_US 1553
+#define REVERSE_PULSE_WIDTH_US 1378
+#define KNOCKER_ON_TIME_MS 80
+#define KNOCKER_BASE_MS 200 /* 200 ms base period for 5 Hz minimum knocker duty cycle */
+#define PWM_FRAME_MS 10     /* 50 Hz PWM frame rate */
 
 extern TIM_HandleTypeDef htim1;
 QueueHandle_t PWM_Queue;
+
+typedef struct
+{
+    uint32_t active_pulse;
+    uint32_t frames_on;
+    uint32_t frames_off;
+    uint32_t frame_counter;
+    uint8_t state_on;
+    uint32_t timer_channel;
+} Servo_t;
+
+static Servo_t servo_horizontal;
+static Servo_t servo_vertical;
+
+static void Servo_Update(Servo_t *servo);
+static void Servo_Init(Servo_t *servo, uint32_t timer_channel);
+void Set_Servo_Drive(Servo_t *servo, PWM_Direction_t direction, uint16_t duty_cycle);
+
+volatile uint32_t next_pulse_h = IDLE_PULSE_WIDTH_US;
+volatile uint32_t next_pulse_v = IDLE_PULSE_WIDTH_US;
+volatile uint8_t new_frame_ready = 0;
 
 /**
  * @brief Control PWM timers for servo control
@@ -39,44 +65,136 @@ void PWM_Timer_Task(void *pvParameters)
      *
      * Configuration set in CubeMX
      */
+    PWM_Duty_Cycle_t cmd;
 
-    /* Initialize PWM duty cycles to 50% (1.5 ms pulse width) */
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 1500);
-    __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 1500);
+    Servo_Init(&servo_horizontal, TIM_CHANNEL_2);
+    Servo_Init(&servo_vertical, TIM_CHANNEL_1);
 
-    /* Start PWM generation on TIM1 CH1 and CH2 */
-    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+    TickType_t last_wake_time = xTaskGetTickCount();
 
-    PWM_Duty_Cycle_t pwm_msg;
+    HAL_TIM_Base_Start_IT(&htim1);
 
-    while (true)
+    while (1)
     {
-        /* Wait for new PWM duty cycle from queue */
-
-        if (xQueueReceive(PWM_Queue, &pwm_msg, portMAX_DELAY) == pdTRUE)
+        if (xQueueReceive(PWM_Queue, &cmd, 0) == pdTRUE)
         {
-            if (pwm_msg.pulse_width > 499)
+            if (cmd.channel == HORIZONTAL_SERVO_PWM)
             {
-                pwm_msg.pulse_width = 499; /* Cap at 1.999 ms */
+                Set_Servo_Drive(&servo_horizontal, cmd.direction, cmd.duty_cycle);
             }
-            else if (pwm_msg.pulse_width < -499)
+            else if (cmd.channel == VERTICAL_SERVO_PWM)
             {
-                pwm_msg.pulse_width = -499; /* Cap at 1.001 ms */
-            }
-
-            /* Scale duty cycle percent to timer pulse length from 1 to 2 ms */
-            uint32_t pulse_width = PULSE_WIDTH_OFFSET + (pwm_msg.pulse_width); /* Centre pulse width between 1 and 2 ms */
-            if (pwm_msg.channel == VERTICAL_SERVO_PWM)
-            {
-                __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, pulse_width);
-            }
-            else if (pwm_msg.channel == HORIZONTAL_SERVO_PWM)
-            {
-                __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, pulse_width);
+                Set_Servo_Drive(&servo_vertical, cmd.direction, cmd.duty_cycle);
             }
         }
+
+        // Servo_Update(&servo_horizontal);
+        // Servo_Update(&servo_vertical);
+
+        // next_pulse_h = servo_horizontal.state_on ? servo_horizontal.active_pulse : IDLE_PULSE_WIDTH_US;
+        // next_pulse_v = servo_vertical.state_on ? servo_vertical.active_pulse : IDLE_PULSE_WIDTH_US;
+        // new_frame_ready = 1;
+
+        vTaskDelayUntil(&last_wake_time, pdMS_TO_TICKS(PWM_FRAME_MS + 100));
     }
 
     UNUSED(pvParameters);
+}
+
+/**
+ * @brief Update state machine for one servo
+ *
+ * @param Servo_t *servo Pointer to servo structure
+ */
+static void Servo_Update(Servo_t *servo)
+{
+    if (servo->state_on)
+    {
+        servo->frame_counter++;
+        if (servo->frame_counter >= servo->frames_on)
+        {
+            servo->frame_counter = 0;
+            servo->state_on = 0;
+        }
+    }
+    else
+    {
+        servo->frame_counter++;
+        if (servo->frame_counter >= servo->frames_off)
+        {
+            servo->frame_counter = 0;
+            servo->state_on = 1;
+        }
+    }
+}
+
+/**
+ * @brief Initialize Servo PWM Driver
+ *
+ * @param Servo_t *servo Pointer to servo structure
+ */
+static void Servo_Init(Servo_t *servo, uint32_t timer_channel)
+{
+    servo->active_pulse = IDLE_PULSE_WIDTH_US;
+    servo->frames_on = KNOCKER_ON_TIME_MS / 20;
+    if (servo->frames_on == 0)
+    {
+        servo->frames_on = 1;
+    }
+    servo->frames_off = (KNOCKER_BASE_MS - KNOCKER_ON_TIME_MS) / 20;
+    servo->frame_counter = 0;
+    servo->state_on = 1;
+    servo->timer_channel = timer_channel;
+
+    __HAL_TIM_SET_COMPARE(&htim1, servo->timer_channel, IDLE_PULSE_WIDTH_US);
+    HAL_TIM_PWM_Start(&htim1, servo->timer_channel);
+}
+
+/**
+ * @brief Set servo drive
+ *
+ * @param servo Servo to update
+ * @param direction Direction enum for servo movement
+ * @param duty_cycle Duty cycle percentage (0-100)
+ */
+void Set_Servo_Drive(Servo_t *servo, PWM_Direction_t direction, uint16_t duty_cycle)
+{
+    if (duty_cycle > 100)
+    {
+        duty_cycle = 100;
+    }
+
+    uint32_t off_time = ((100 - duty_cycle) * KNOCKER_BASE_MS) / 100;
+
+    servo->frames_off = off_time / 20;
+    servo->frames_on = KNOCKER_ON_TIME_MS / 20;
+    if (servo->frames_on == 0)
+    {
+        servo->frames_on = 1;
+    }
+
+    servo->active_pulse = IDLE_PULSE_WIDTH_US;
+    if (direction > 0)
+    {
+        servo->active_pulse = FORWARD_PULSE_WIDTH_US;
+    }
+    else if (direction < 0)
+    {
+        servo->active_pulse = REVERSE_PULSE_WIDTH_US;
+    }
+}
+
+/* Called on TIM1 update event */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+    if (htim->Instance == TIM1)
+    {
+        Servo_Update(&servo_horizontal);
+        Servo_Update(&servo_vertical);
+
+        next_pulse_h = servo_horizontal.state_on ? servo_horizontal.active_pulse : IDLE_PULSE_WIDTH_US;
+        next_pulse_v = servo_vertical.state_on ? servo_vertical.active_pulse : IDLE_PULSE_WIDTH_US;
+        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, next_pulse_v);
+        __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, next_pulse_h);
+    }
 }

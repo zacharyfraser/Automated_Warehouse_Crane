@@ -135,6 +135,19 @@ static void set_horizontal_speed_handler(char arguments[6][16], uint8_t arg_coun
 
     PWM_Duty_Cycle_t pwm_msg;
     pwm_msg.channel = HORIZONTAL_SERVO_PWM;
-    pwm_msg.pulse_width = (int16_t)new_speed;
+    if (new_speed > 0)
+    {
+        pwm_msg.direction = DIRECTION_CLOCKWISE;
+    }
+    else if (new_speed < 0)
+    {
+        pwm_msg.direction = DIRECTION_COUNTERCLOCKWISE;
+        new_speed = -new_speed; /* Make speed positive for duty cycle */
+    }
+    else
+    {
+        pwm_msg.direction = DIRECTION_IDLE;
+    }
+    pwm_msg.duty_cycle = (int16_t)new_speed;
     xQueueSend(PWM_Queue, &pwm_msg, portMAX_DELAY);
 }
