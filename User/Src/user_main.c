@@ -28,7 +28,6 @@ extern QueueHandle_t Queue_hostPC_UART;
 extern QueueHandle_t Raw_Ultrasonic_Queue;
 extern QueueHandle_t Filtered_Ultrasonic_Queue;
 extern QueueHandle_t Motor_Setpoint_Queue;
-extern SemaphoreHandle_t Control_Loop_Enable_Semaphore;
 
 /* Local function prototypes */
 void create_queues(void);
@@ -57,19 +56,17 @@ void user_main(void)
 void create_queues(void)
 {
     /* Update PWM pulse widths */
-    PWM_Queue = xQueueCreate(10, sizeof(PWM_Duty_Cycle_t));
+    PWM_Queue = xQueueCreate(2, sizeof(PWM_Duty_Cycle_t));
     /* Commands received from Host PC */
-    Command_Queue = xQueueCreate(10, sizeof(Message_t));
+    Command_Queue = xQueueCreate(1, sizeof(Message_t));
     /* Queue for Host PC UART characters*/
     Queue_hostPC_UART = xQueueCreate(80, sizeof(uint8_t));
     /* Queue for Ultrasonic sensor readings */
-    Raw_Ultrasonic_Queue = xQueueCreate(10, sizeof(uint32_t));
+    Raw_Ultrasonic_Queue = xQueueCreate(1, sizeof(uint32_t));
     /* Queue for Filtered Ultrasonic sensor readings */
-    Filtered_Ultrasonic_Queue = xQueueCreate(10, sizeof(uint32_t));
+    Filtered_Ultrasonic_Queue = xQueueCreate(1, sizeof(uint32_t));
     /* Queue for Motor Setpoints */
-    Motor_Setpoint_Queue = xQueueCreate(10, sizeof(uint32_t));
-    /* Semaphore to enable/disable control loop */
-    Control_Loop_Enable_Semaphore = xSemaphoreCreateBinary();
+    Motor_Setpoint_Queue = xQueueCreate(1, sizeof(uint32_t));
 }
 
 /**

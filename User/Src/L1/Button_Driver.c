@@ -22,7 +22,7 @@
  */
 Button_Actuation_t Read_Horizontal_Switch(void)
 {
-    if (HAL_GPIO_ReadPin(SWITCH_H_GPIO_Port, SWITCH_H_Pin) == GPIO_PIN_SET)
+    if (HAL_GPIO_ReadPin(SWITCH_H_GPIO_Port, SWITCH_H_Pin) == GPIO_PIN_RESET)
     {
         return BUTTON_PRESSED;
     }
@@ -38,7 +38,7 @@ Button_Actuation_t Read_Horizontal_Switch(void)
  */
 Button_Actuation_t Read_Vertical_Switch(void)
 {
-    if (HAL_GPIO_ReadPin(SWITCH_V_GPIO_Port, SWITCH_V_Pin) == GPIO_PIN_SET)
+    if (HAL_GPIO_ReadPin(SWITCH_V_GPIO_Port, SWITCH_V_Pin) == GPIO_PIN_RESET)
     {
         return BUTTON_PRESSED;
     }
@@ -54,7 +54,7 @@ Button_Actuation_t Read_Vertical_Switch(void)
  */
 Button_Actuation_t Read_Horizontal_Button(void)
 {
-    if (HAL_GPIO_ReadPin(BUTTON_H_GPIO_Port, BUTTON_H_Pin) == GPIO_PIN_SET)
+    if (HAL_GPIO_ReadPin(BUTTON_H_GPIO_Port, BUTTON_H_Pin) == GPIO_PIN_RESET)
     {
         return BUTTON_PRESSED;
     }
@@ -70,7 +70,7 @@ Button_Actuation_t Read_Horizontal_Button(void)
  */
 Button_Actuation_t Read_Vertical_Button(void)
 {
-    if (HAL_GPIO_ReadPin(BUTTON_V_GPIO_Port, BUTTON_V_Pin) == GPIO_PIN_SET)
+    if (HAL_GPIO_ReadPin(BUTTON_V_GPIO_Port, BUTTON_V_Pin) == GPIO_PIN_RESET)
     {
         return BUTTON_PRESSED;
     }

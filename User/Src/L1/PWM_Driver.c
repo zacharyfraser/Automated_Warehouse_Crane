@@ -211,6 +211,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
  */
 void PWM_Disable_All(void)
 {
-    next_pulse_h = IDLE_PULSE_WIDTH_US;
-    next_pulse_v = IDLE_PULSE_WIDTH_US;
+    HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
+    HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_2);
 }

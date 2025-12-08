@@ -14,6 +14,7 @@
 #include "user_main.h"
 #include "L1/Button_Driver.h"
 #include "L1/PWM_Driver.h"
+#include "L3/Control_Loop.h"
 
 typedef enum Manual_States
 {
@@ -35,6 +36,7 @@ static void Set_Vertical_Movement(Vertical_Direction_t direction);
 void Initialize_Manual_Mode(void)
 {
     manual_state = STATE_MANUAL_IDLE;
+    Toggle_PID_Control(false); /* Disable PID control loop */
 }
 
 /**

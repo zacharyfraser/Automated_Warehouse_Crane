@@ -24,13 +24,16 @@
 
 #define MODE_CONTROL_TASK_DELAY_MS 10
 
-Control_Mode_t current_mode = MODE_MANUAL;
+static Control_Mode_t current_mode = MODE_MANUAL;
 
 /**
  * @brief Task to manage control mode of the crane.
  */
 void Mode_Control_Task(void *pvParameters)
 {
+    Initialize_Manual_Mode();
+    Initialize_Calibrate_Mode();
+    Initialize_Auto_Mode();
     while (true)
     {
         switch (current_mode)
@@ -49,8 +52,6 @@ void Mode_Control_Task(void *pvParameters)
             break;
         }
     }
-
-    vTaskDelay(pdMS_TO_TICKS(MODE_CONTROL_TASK_DELAY_MS));
     UNUSED(pvParameters);
 }
 

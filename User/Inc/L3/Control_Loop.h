@@ -18,4 +18,6 @@ void Set_Integral_Gain(float Ki);
 void Set_Derivative_Gain(float Kd);
 void Print_PID_Gains(void);
 
+#define MOTOR_EVENT_BIT (1 << 0)
+
 #endif /* CONTROL_LOOP_H */

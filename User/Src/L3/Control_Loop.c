@@ -44,9 +44,10 @@ typedef struct
 extern QueueHandle_t Filtered_Ultrasonic_Queue;
 extern QueueHandle_t PWM_Queue;
 QueueHandle_t Motor_Setpoint_Queue;
-SemaphoreHandle_t Control_Loop_Enable_Semaphore;
+EventGroupHandle_t Motor_Event_Group;
 
 static int32_t vertical_position_setpoint_mm = STARTUP_SETPOINT_MM;
+static volatile bool control_loop_enabled = false;
 
 PID_Controller_t vertical_pid = {
     .Kp = 15.0f, .Ki = 0.0f, .Kd = 0.0f, .previous_error = 0.0f, .integral = 0.0f}; /* Proportional only due to non-linearities */
@@ -74,20 +75,29 @@ void Update_Motor_Setpoint_Task(void *pvParameters)
  */
 void Control_Loop_Task(void *pvParameters)
 {
-    xSemaphoreGive(Control_Loop_Enable_Semaphore); /* Enable control loop at start */
-
+    Motor_Event_Group = xEventGroupCreate();
     while (1)
     {
         int32_t current_position_mm;
 
-        xSemaphoreTake(Control_Loop_Enable_Semaphore, portMAX_DELAY);
-        xSemaphoreGive(Control_Loop_Enable_Semaphore);
+        if (!control_loop_enabled)
+        {
+            vTaskDelay(pdMS_TO_TICKS(10));
+            continue;
+        }
+
         /* Read filtered ultrasonic distance */
         if (xQueueReceive(Filtered_Ultrasonic_Queue, &current_position_mm, pdMS_TO_TICKS(ULTRASONIC_SAMPLE_RATE_MS)) == pdTRUE)
         {
             float error = (float)(vertical_position_setpoint_mm - current_position_mm);
             float control_output = PID_Compute(&vertical_pid, error, ULTRASONIC_SAMPLE_RATE_MS / 1000.0f);
             control_output = -control_output; /* Invert control output for motor direction */
+
+            /* Signal Setpoint Reached */
+            if (fabsf(error) < DEADZONE_MM)
+            {
+                xEventGroupSetBits(Motor_Event_Group, MOTOR_EVENT_BIT);
+            }
 
             /* Prepare PWM message */
             PWM_Duty_Cycle_t pwm_msg;
@@ -184,14 +194,7 @@ void Set_Setpoint(uint32_t setpoint_mm)
  */
 void Toggle_PID_Control(bool enable)
 {
-    if (enable)
-    {
-        xSemaphoreGive(Control_Loop_Enable_Semaphore);
-    }
-    else
-    {
-        xSemaphoreTake(Control_Loop_Enable_Semaphore, portMAX_DELAY);
-    }
+    control_loop_enabled = enable;
 }
 
 /**

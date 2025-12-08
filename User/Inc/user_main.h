@@ -14,12 +14,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "FreeRTOS.h" /* FreeRTOS kernal */
-#include "task.h"     /* FreeRTOS task functions */
-#include "queue.h"    /* FreeRTOS queue functions */
-#include "semphr.h"   /* FreeRTOS semaphore functions */
-#include "main.h"     /* Hal and Object Handles */
-#include "util.h"     /* Print Functions */
+#include "FreeRTOS.h"     /* FreeRTOS kernal */
+#include "event_groups.h" /* FreeRTOS event group functions */
+#include "task.h"         /* FreeRTOS task functions */
+#include "queue.h"        /* FreeRTOS queue functions */
+#include "semphr.h"       /* FreeRTOS semaphore functions */
+#include "main.h"         /* Hal and Object Handles */
+#include "util.h"         /* Print Functions */
 
 void user_main(void);
 
