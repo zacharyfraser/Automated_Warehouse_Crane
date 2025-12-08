@@ -22,6 +22,8 @@
 #include <complex.h>
 #include "Mode_Control.h"
 
+#define MODE_CONTROL_TASK_DELAY_MS 10
+
 Control_Mode_t current_mode = MODE_MANUAL;
 
 /**
@@ -48,6 +50,7 @@ void Mode_Control_Task(void *pvParameters)
         }
     }
 
+    vTaskDelay(pdMS_TO_TICKS(MODE_CONTROL_TASK_DELAY_MS));
     UNUSED(pvParameters);
 }
 

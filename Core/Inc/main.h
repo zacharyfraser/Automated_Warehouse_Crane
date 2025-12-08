@@ -57,8 +57,9 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define B1_Pin GPIO_PIN_13
-#define B1_GPIO_Port GPIOC
+#define LIM_SW_R_Pin GPIO_PIN_13
+#define LIM_SW_R_GPIO_Port GPIOC
+#define LIM_SW_R_EXTI_IRQn EXTI15_10_IRQn
 #define ULTRASONIC_TRIGGER_Pin GPIO_PIN_0
 #define ULTRASONIC_TRIGGER_GPIO_Port GPIOA
 #define USART_TX_Pin GPIO_PIN_2
@@ -69,16 +70,33 @@ void Error_Handler(void);
 #define LD2_GPIO_Port GPIOA
 #define ULTRASONIC_ECHO_Pin GPIO_PIN_6
 #define ULTRASONIC_ECHO_GPIO_Port GPIOA
+#define BUTTON_H_Pin GPIO_PIN_6
+#define BUTTON_H_GPIO_Port GPIOC
+#define SWITCH_H_Pin GPIO_PIN_8
+#define SWITCH_H_GPIO_Port GPIOC
+#define SWITCH_V_Pin GPIO_PIN_9
+#define SWITCH_V_GPIO_Port GPIOC
 #define VERTICAL_SERVO_PWM_Pin GPIO_PIN_8
 #define VERTICAL_SERVO_PWM_GPIO_Port GPIOA
 #define HORIZONTAL_SERVO_PWM_Pin GPIO_PIN_9
 #define HORIZONTAL_SERVO_PWM_GPIO_Port GPIOA
+#define LIM_SW_HIGH_Pin GPIO_PIN_10
+#define LIM_SW_HIGH_GPIO_Port GPIOA
+#define LIM_SW_HIGH_EXTI_IRQn EXTI15_10_IRQn
+#define LIM_SW_LOW_Pin GPIO_PIN_11
+#define LIM_SW_LOW_GPIO_Port GPIOA
+#define LIM_SW_LOW_EXTI_IRQn EXTI15_10_IRQn
+#define LIM_SW_L_Pin GPIO_PIN_12
+#define LIM_SW_L_GPIO_Port GPIOA
+#define LIM_SW_L_EXTI_IRQn EXTI15_10_IRQn
 #define TMS_Pin GPIO_PIN_13
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
 #define TCK_GPIO_Port GPIOA
 #define SWO_Pin GPIO_PIN_3
 #define SWO_GPIO_Port GPIOB
+#define BUTTON_V_Pin GPIO_PIN_8
+#define BUTTON_V_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

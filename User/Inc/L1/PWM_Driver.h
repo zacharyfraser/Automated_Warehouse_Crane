@@ -31,6 +31,7 @@ typedef struct PWM_DUTY_CYCLE
     uint16_t duty_cycle; /* 0 to 100 percent */
 } PWM_Duty_Cycle_t;
 
+void PWM_Disable_All(void);
 void PWM_Timer_Task(void *pvParameters);
 
 #endif /* PWM_DRIVER_H */

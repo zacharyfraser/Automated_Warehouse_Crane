@@ -28,6 +28,7 @@ extern QueueHandle_t Queue_hostPC_UART;
 extern QueueHandle_t Raw_Ultrasonic_Queue;
 extern QueueHandle_t Filtered_Ultrasonic_Queue;
 extern QueueHandle_t Motor_Setpoint_Queue;
+extern SemaphoreHandle_t Control_Loop_Enable_Semaphore;
 
 /* Local function prototypes */
 void create_queues(void);
@@ -67,6 +68,8 @@ void create_queues(void)
     Filtered_Ultrasonic_Queue = xQueueCreate(10, sizeof(uint32_t));
     /* Queue for Motor Setpoints */
     Motor_Setpoint_Queue = xQueueCreate(10, sizeof(uint32_t));
+    /* Semaphore to enable/disable control loop */
+    Control_Loop_Enable_Semaphore = xSemaphoreCreateBinary();
 }
 
 /**

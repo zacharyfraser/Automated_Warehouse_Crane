@@ -13,10 +13,11 @@
 
 /* User Libraries */
 #include "user_main.h"
+#include "stm32f4xx_hal_tim.h"
 
 #define IDLE_PULSE_WIDTH_US 1500
-#define FORWARD_PULSE_WIDTH_US 1553
-#define REVERSE_PULSE_WIDTH_US 1378
+#define COUNTERCLOCKWISE_PULSE_WIDTH_US 1553
+#define CLOCKWISE_PULSE_WIDTH_US 1378
 #define KNOCKER_ON_TIME_MS 40
 #define KNOCKER_BASE_MS 100 /* 200 ms base period for 5 Hz minimum knocker duty cycle */
 #define PWM_FRAME_MS 10     /* 50 Hz PWM frame rate */
@@ -168,17 +169,24 @@ void Set_Servo_Drive(Servo_t *servo, PWM_Direction_t direction, uint16_t duty_cy
     }
 
     servo->active_pulse = IDLE_PULSE_WIDTH_US;
-    if (direction > 0)
+    if (direction == DIRECTION_CLOCKWISE)
     {
-        servo->active_pulse = FORWARD_PULSE_WIDTH_US;
+        servo->active_pulse = CLOCKWISE_PULSE_WIDTH_US;
     }
-    else if (direction < 0)
+    else if (direction == DIRECTION_COUNTERCLOCKWISE)
     {
-        servo->active_pulse = REVERSE_PULSE_WIDTH_US;
+        servo->active_pulse = COUNTERCLOCKWISE_PULSE_WIDTH_US;
     }
 }
 
-/* Called on TIM1 update event */
+/**
+ * @brief Timer period elapsed callback
+ *
+ * This function is called by the HAL library on every timer rollover (10ms).
+ * It updates the servo states and sets the next pulse widths.
+ *
+ * @param htim Pointer to the TIM handle.
+ */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == TIM1)
@@ -195,4 +203,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
         __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, next_pulse_v);
         __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, next_pulse_h);
     }
+}
+
+/**
+ * @brief Disable all PWM outputs and set to idle
+ * Used when limit switches are triggered
+ */
+void PWM_Disable_All(void)
+{
+    next_pulse_h = IDLE_PULSE_WIDTH_US;
+    next_pulse_v = IDLE_PULSE_WIDTH_US;
 }
