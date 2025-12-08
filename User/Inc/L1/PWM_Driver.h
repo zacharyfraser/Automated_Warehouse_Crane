@@ -17,10 +17,18 @@ typedef enum PWM_CHANNEL
     HORIZONTAL_SERVO_PWM = 2
 } PWM_Channel_t;
 
+typedef enum PWM_DIRECTION
+{
+    DIRECTION_CLOCKWISE = 1,
+    DIRECTION_COUNTERCLOCKWISE = -1,
+    DIRECTION_IDLE = 0
+} PWM_Direction_t;
+
 typedef struct PWM_DUTY_CYCLE
 {
     PWM_Channel_t channel;
-    int16_t pulse_width; /* -500 to 500 maps to full scale servo pulse_width (1 ms to 2 ms pulse width) */
+    PWM_Direction_t direction;
+    uint16_t duty_cycle; /* 0 to 100 percent */
 } PWM_Duty_Cycle_t;
 
 void PWM_Timer_Task(void *pvParameters);

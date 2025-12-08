@@ -8,6 +8,7 @@
 #include "L1/Ultrasonic_Driver.h"
 
 /* Standard Libraries */
+#include <stdio.h>
 
 /* User Libraries */
 #include "user_main.h"
@@ -60,7 +61,9 @@ void Ultrasonic_Read_Task(void *pvParameters)
             /* distance_mm = pulse_width_us * speed_of_sound_mm_per_us / 2 */
             /* speed_of_sound ≈ 0.343 mm/us → multiply by 343 and divide by 1000 for mm */
             distance_mm = (pulse_width_us * SPEED_OF_SOUND_UM_PER_US) / UM_PER_MM / 2; /* Divide by 2 for round trip */
-
+            char debug_string[64];
+            sprintf(debug_string, "Ultrasonic Distance: %lu mm\r\n", distance_mm);
+            print_str(debug_string);
             /* Send distance to queue */
             xQueueSend(Raw_Ultrasonic_Queue, &distance_mm, portMAX_DELAY);
         }
@@ -72,7 +75,7 @@ void Ultrasonic_Read_Task(void *pvParameters)
         }
 
         /* Wait for next sample period */
-        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(100));
+        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(30));
         UNUSED(pvParameters);
     }
 }

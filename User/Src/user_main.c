@@ -20,6 +20,7 @@
 #include "L2/Sensor_Filter.h"
 #include "L3/Command_Dispatch.h"
 #include "L3/Control_Loop.h"
+#include "L5/Mode_Control.h"
 
 extern QueueHandle_t PWM_Queue;
 extern QueueHandle_t Command_Queue;
@@ -97,6 +98,10 @@ void create_initial_tasks(void)
     xTaskCreate(Update_Motor_Setpoint_Task, "Update Motor Setpoint Task", configMINIMAL_STACK_SIZE + 100, NULL,
                 tskIDLE_PRIORITY + 2, NULL);
     xTaskCreate(Control_Loop_Task, "Control Loop Task", configMINIMAL_STACK_SIZE + 300, NULL,
+                tskIDLE_PRIORITY + 2, NULL);
+
+    /* High Level State Machine Task */
+    xTaskCreate(Mode_Control_Task, "Mode Control Task", configMINIMAL_STACK_SIZE + 200, NULL,
                 tskIDLE_PRIORITY + 2, NULL);
     /* Debug Tasks */
     xTaskCreate(Debug_Task1, "Debug_Task1", configMINIMAL_STACK_SIZE + 100, NULL,
