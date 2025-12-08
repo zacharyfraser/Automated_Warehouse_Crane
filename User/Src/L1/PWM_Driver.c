@@ -17,8 +17,8 @@
 #define IDLE_PULSE_WIDTH_US 1500
 #define FORWARD_PULSE_WIDTH_US 1553
 #define REVERSE_PULSE_WIDTH_US 1378
-#define KNOCKER_ON_TIME_MS 80
-#define KNOCKER_BASE_MS 200 /* 200 ms base period for 5 Hz minimum knocker duty cycle */
+#define KNOCKER_ON_TIME_MS 40
+#define KNOCKER_BASE_MS 100 /* 200 ms base period for 5 Hz minimum knocker duty cycle */
 #define PWM_FRAME_MS 10     /* 50 Hz PWM frame rate */
 
 extern TIM_HandleTypeDef htim1;
@@ -48,9 +48,11 @@ volatile uint8_t new_frame_ready = 0;
 /**
  * @brief Control PWM timers for servo control
  *
- * Configures PWM timers on TIM1 CH1 and CH2 at 50 Hz
- * Waits for queue messages to update PWM duty cycles
- * Duty cycle specified as percentage (0-100%) corresponding to 1 ms to 2 ms pulse width
+ * Configures PWM timers on TIM1 CH1 and CH2 at 100 Hz
+ * Servo drive is set by a lower frequency duty cycle wrapping a constant PWM signal.
+ * This allows for more precise control of the servo speed, and overcoming sticktion in the vertical mechanism.
+ *
+ * Note that the servos are overdriven at 100 Hz in order to increase bandwidth for the knocker mechanism.
  */
 void PWM_Timer_Task(void *pvParameters)
 {
@@ -61,7 +63,7 @@ void PWM_Timer_Task(void *pvParameters)
      * Prescaler = (Timer clock / Desired counter clock) - 1
      * Prescaler = (84,000,000 / 1,000,000) - 1 = 83
      * Counter clock = 1 MHz
-     * PWM Frequency = Counter clock / (Period + 1) = 1,000,000 / 20000 = 50 Hz
+     * PWM Frequency = Counter clock / (Period + 1) = 1,000,000 / 10000 = 100 Hz
      *
      * Configuration set in CubeMX
      */
@@ -70,13 +72,13 @@ void PWM_Timer_Task(void *pvParameters)
     Servo_Init(&servo_horizontal, TIM_CHANNEL_2);
     Servo_Init(&servo_vertical, TIM_CHANNEL_1);
 
-    TickType_t last_wake_time = xTaskGetTickCount();
-
+    /* Start timer with update interrupt every rollover (10 ms) */
     HAL_TIM_Base_Start_IT(&htim1);
 
     while (1)
+    /* Update Servo Drive Duty Cycles*/
     {
-        if (xQueueReceive(PWM_Queue, &cmd, 0) == pdTRUE)
+        if (xQueueReceive(PWM_Queue, &cmd, portMAX_DELAY) == pdTRUE)
         {
             if (cmd.channel == HORIZONTAL_SERVO_PWM)
             {
@@ -87,22 +89,13 @@ void PWM_Timer_Task(void *pvParameters)
                 Set_Servo_Drive(&servo_vertical, cmd.direction, cmd.duty_cycle);
             }
         }
-
-        // Servo_Update(&servo_horizontal);
-        // Servo_Update(&servo_vertical);
-
-        // next_pulse_h = servo_horizontal.state_on ? servo_horizontal.active_pulse : IDLE_PULSE_WIDTH_US;
-        // next_pulse_v = servo_vertical.state_on ? servo_vertical.active_pulse : IDLE_PULSE_WIDTH_US;
-        // new_frame_ready = 1;
-
-        vTaskDelayUntil(&last_wake_time, pdMS_TO_TICKS(PWM_FRAME_MS + 100));
     }
 
     UNUSED(pvParameters);
 }
 
 /**
- * @brief Update state machine for one servo
+ * @brief Update duty cycle state machine for one servo
  *
  * @param Servo_t *servo Pointer to servo structure
  */
@@ -136,16 +129,17 @@ static void Servo_Update(Servo_t *servo)
 static void Servo_Init(Servo_t *servo, uint32_t timer_channel)
 {
     servo->active_pulse = IDLE_PULSE_WIDTH_US;
-    servo->frames_on = KNOCKER_ON_TIME_MS / 20;
+    servo->frames_on = KNOCKER_ON_TIME_MS / PWM_FRAME_MS;
     if (servo->frames_on == 0)
     {
         servo->frames_on = 1;
     }
-    servo->frames_off = (KNOCKER_BASE_MS - KNOCKER_ON_TIME_MS) / 20;
+    servo->frames_off = 0;
     servo->frame_counter = 0;
     servo->state_on = 1;
     servo->timer_channel = timer_channel;
 
+    /* Start PWM channel */
     __HAL_TIM_SET_COMPARE(&htim1, servo->timer_channel, IDLE_PULSE_WIDTH_US);
     HAL_TIM_PWM_Start(&htim1, servo->timer_channel);
 }
@@ -164,10 +158,10 @@ void Set_Servo_Drive(Servo_t *servo, PWM_Direction_t direction, uint16_t duty_cy
         duty_cycle = 100;
     }
 
-    uint32_t off_time = ((100 - duty_cycle) * KNOCKER_BASE_MS) / 100;
+    uint32_t off_time = (100 - duty_cycle);
 
-    servo->frames_off = off_time / 20;
-    servo->frames_on = KNOCKER_ON_TIME_MS / 20;
+    servo->frames_off = off_time / PWM_FRAME_MS;
+    servo->frames_on = KNOCKER_ON_TIME_MS / PWM_FRAME_MS;
     if (servo->frames_on == 0)
     {
         servo->frames_on = 1;
@@ -189,11 +183,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
     if (htim->Instance == TIM1)
     {
+        /* Update servo state every pulse (10 ms) */
         Servo_Update(&servo_horizontal);
         Servo_Update(&servo_vertical);
 
+        /* Set next pulse widths */
         next_pulse_h = servo_horizontal.state_on ? servo_horizontal.active_pulse : IDLE_PULSE_WIDTH_US;
         next_pulse_v = servo_vertical.state_on ? servo_vertical.active_pulse : IDLE_PULSE_WIDTH_US;
+
+        /* Update PWM compare registers */
         __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, next_pulse_v);
         __HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, next_pulse_h);
     }
