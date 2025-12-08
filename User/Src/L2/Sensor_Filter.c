@@ -13,7 +13,7 @@
 #include "user_main.h"
 
 #define MEDIAN_WINDOW_SIZE 3
-#define ALPHA 160 /* Alpha value in Q8 form */
+#define ALPHA 160 /* fc = ~3.3 Hz */
 #define Q8_SCALE_FACTOR 256
 
 /* Median filter buffer */

@@ -15,11 +15,16 @@
 #include "user_main.h"
 #include "L2/Comm_Datalink.h"
 #include "L3/Control_Loop.h"
+#include "L5/Mode_Control.h"
+#include "L1/PWM_Driver.h"
 
 extern QueueHandle_t Command_Queue;
+extern QueueHandle_t PWM_Queue;
 
 static void change_mode_handler(char arguments[6][16], uint8_t arg_count);
 static void set_setpoint_handler(char arguments[6][16], uint8_t arg_count);
+static void set_horizontal_speed_handler(char arguments[6][16], uint8_t arg_count);
+
 /* Command Entry Structure */
 typedef struct COMMAND_ENTRY
 {
@@ -29,7 +34,10 @@ typedef struct COMMAND_ENTRY
 
 /* Command Table */
 Command_Entry_t Command_Table[] = {
-    {"change_mode", change_mode_handler}, {"set_height", set_setpoint_handler}};
+    {"chmd", change_mode_handler},
+    {"spt", set_setpoint_handler},
+    {"hvel", set_horizontal_speed_handler},
+};
 
 /**
  * @brief Task to handle PC commands and dispatch them to appropriate modules.
@@ -94,9 +102,39 @@ static void change_mode_handler(char arguments[6][16], uint8_t arg_count)
     if (strcmp(arguments[0], "auto") == 0)
     {
         print_str("Changing to AUTO mode.\r\n");
+        Transition_Mode(MODE_AUTOMATIC);
     }
     else if (strcmp(arguments[0], "manual") == 0)
     {
         print_str("Changing to MANUAL mode.\r\n");
+        Transition_Mode(MODE_MANUAL);
     }
+    else if (strcmp(arguments[0], "calibrate") == 0)
+    {
+        print_str("Changing to CALIBRATION mode.\r\n");
+        Transition_Mode(MODE_CALIBRATION);
+    }
+}
+
+/**
+ * @brief Handler for the "hv" command.
+ *
+ * Sets the horizontal servo speed.
+ *
+ * @param arguments Array of argument strings.
+ * @param arg_count Number of arguments provided.
+ */
+static void set_horizontal_speed_handler(char arguments[6][16], uint8_t arg_count)
+{
+    if (arg_count < 1)
+    {
+        return;
+    }
+
+    int32_t new_speed = atoi(arguments[0]);
+
+    PWM_Duty_Cycle_t pwm_msg;
+    pwm_msg.channel = HORIZONTAL_SERVO_PWM;
+    pwm_msg.pulse_width = (int16_t)new_speed;
+    xQueueSend(PWM_Queue, &pwm_msg, portMAX_DELAY);
 }

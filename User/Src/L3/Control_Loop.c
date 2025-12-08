@@ -18,15 +18,17 @@
 #include "user_main.h"
 #include "L1/PWM_Driver.h"
 
-#define PWM_MAX 150.0f  /* Max pulse width adjustment for PWM (in microseconds) */
-#define PWM_MIN -100.0f /* Min pulse width adjustment for PWM (in microseconds) */
+#define PWM_MAX 40.0f  /* Max pulse width adjustment for PWM (in microseconds) */
+#define PWM_MIN -30.0f /* Min pulse width adjustment for PWM (in microseconds) */
 #define SETPOINT_MIN_MM 30.0f
-#define SETPOINT_MAX_MM 120.0f
+#define SETPOINT_MAX_MM 130.0f
 
 #define PID_ANTI_WINDUP_LIMIT 150.0f
-#define DEADZONE_MM 5.0f
+#define DEADZONE_MM 2.0f
 
-#define ULTRASONIC_SAMPLE_RATE_MS 100
+#define GRAVITY_COMPENSATION 0.7f
+
+#define ULTRASONIC_SAMPLE_RATE_MS 30
 #define STARTUP_SETPOINT_MM 100
 
 extern QueueHandle_t Filtered_Ultrasonic_Queue;
@@ -68,7 +70,7 @@ void Update_Motor_Setpoint_Task(void *pvParameters)
 void Control_Loop_Task(void *pvParameters)
 {
     PID_Controller_t vertical_pid = {
-        .Kp = 10.0f, .Ki = 0.0f, .Kd = -0.1f, .previous_error = 0.0f, .integral = 0.0f};
+        .Kp = 15.0f, .Ki = 0.0f, .Kd = 0.0f, .previous_error = 0.0f, .integral = 0.0f}; /* Proportional only due to non-linearities */
 
     while (1)
     {
@@ -130,6 +132,11 @@ static float PID_Compute(PID_Controller_t *pid, float error, float dT)
 
     /* Total Output */
     output = proportional + pid->integral + derivative;
+
+    if (output < 0)
+    {
+        output *= GRAVITY_COMPENSATION; /* Compensate for gravity when moving up */
+    }
 
     /* Clamp Total Output */
     output = fmaxf(PWM_MIN, fminf(PWM_MAX, output));

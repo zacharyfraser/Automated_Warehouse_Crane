@@ -75,7 +75,7 @@ void Ultrasonic_Read_Task(void *pvParameters)
         }
 
         /* Wait for next sample period */
-        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(100));
+        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(30));
         UNUSED(pvParameters);
     }
 }

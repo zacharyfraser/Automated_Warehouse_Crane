@@ -55,6 +55,10 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     User/Src/L2/Sensor_Filter.c
     User/Src/L3/Command_Dispatch.c
     User/Src/L3/Control_Loop.c
+    User/Src/L4/Auto_Mode.c
+    User/Src/L4/Manual_Mode.c
+    User/Src/L4/Calibrate_Mode.c
+    User/Src/L5/Mode_Control.c
 )
 
 # Add include paths
@@ -65,6 +69,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     User/Inc/L2
     User/Inc/L3
     User/Inc/L4
+    User/Inc/L5
 
 )
 
