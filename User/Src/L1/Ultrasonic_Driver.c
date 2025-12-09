@@ -14,6 +14,7 @@
 #include "user_main.h"
 
 #define ULTRASONIC_READ_TIMEOUT_MS 60
+#define ULTRASONIC_SENSOR_PERIOD_MS 30
 #define SPEED_OF_SOUND_UM_PER_US 343
 #define UM_PER_MM 1000
 
@@ -73,7 +74,7 @@ void Ultrasonic_Read_Task(void *pvParameters)
         }
 
         /* Wait for next sample period */
-        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(30));
+        vTaskDelayUntil(&xLastWakeTime, pdMS_TO_TICKS(ULTRASONIC_SENSOR_PERIOD_MS));
         UNUSED(pvParameters);
     }
 }

@@ -15,13 +15,13 @@
 /* User Libraries */
 #include "user_main.h"
 
-#define HOME_POSITION_MM (60)
+#define HOME_POSITION_MM (30)
 #define LOWER_LATCH_POSITION_MM (70)
-#define UPPER_SHELF_POSITION_MM (130)
-#define UPPER_DROPOFF_POSITION_MM (120)
+#define UPPER_SHELF_POSITION_MM (140)
+#define UPPER_DROPOFF_POSITION_MM (90)
 
-#define COUNTERCLOCKWISE_ROTATE_TIME_MS (2000)
-#define CLOCKWISE_ROTATE_TIME_MS (2000)
+#define COUNTERCLOCKWISE_ROTATE_TIME_MS (3800)
+#define CLOCKWISE_ROTATE_TIME_MS (3600)
 
 typedef enum Auto_States
 {
@@ -82,11 +82,11 @@ void Run_Auto_Mode(void)
         break;
     case STATE_AUTO_MOVE_HORIZONTAL_TO_LOWER_PICKUP:
         print_str("Moving horizontal to lower pickup position\r\n");
-        /* Move Horizontal Arm Counterclockwise */
-        cmd.direction = DIRECTION_COUNTERCLOCKWISE;
-        cmd.duty_cycle = 75;
+        /* Move Horizontal Arm Clockwise */
+        cmd.direction = DIRECTION_CLOCKWISE;
+        cmd.duty_cycle = 30;
         xQueueSend(PWM_Queue, &cmd, portMAX_DELAY);
-        vTaskDelay(pdMS_TO_TICKS(COUNTERCLOCKWISE_ROTATE_TIME_MS));
+        vTaskDelay(pdMS_TO_TICKS(CLOCKWISE_ROTATE_TIME_MS));
         cmd.direction = DIRECTION_IDLE;
         cmd.duty_cycle = 0;
         xQueueSend(PWM_Queue, &cmd, portMAX_DELAY);
@@ -105,11 +105,11 @@ void Run_Auto_Mode(void)
         break;
     case STATE_AUTO_MOVE_HORIZONTAL_TO_CARRY_POSITION:
         print_str("Moving horizontal to carry position\r\n");
-        /* Move Horizontal Arm Clockwise */
-        cmd.direction = DIRECTION_CLOCKWISE;
-        cmd.duty_cycle = 75;
+        /* Move Horizontal Arm Counterclockwise */
+        cmd.direction = DIRECTION_COUNTERCLOCKWISE;
+        cmd.duty_cycle = 30;
         xQueueSend(PWM_Queue, &cmd, portMAX_DELAY);
-        vTaskDelay(pdMS_TO_TICKS(CLOCKWISE_ROTATE_TIME_MS));
+        vTaskDelay(pdMS_TO_TICKS(COUNTERCLOCKWISE_ROTATE_TIME_MS));
         cmd.direction = DIRECTION_IDLE;
         cmd.duty_cycle = 0;
         xQueueSend(PWM_Queue, &cmd, portMAX_DELAY);
@@ -128,11 +128,11 @@ void Run_Auto_Mode(void)
         break;
     case STATE_AUTO_MOVE_HORIZONTAL_TO_UPPER_DROPOFF:
         print_str("Moving horizontal to upper dropoff position\r\n");
-        /* Move Horizontal Arm Clockwise */
-        cmd.direction = DIRECTION_CLOCKWISE;
-        cmd.duty_cycle = 75;
+        /* Move Horizontal Arm Counterclockwise */
+        cmd.direction = DIRECTION_COUNTERCLOCKWISE;
+        cmd.duty_cycle = 30;
         xQueueSend(PWM_Queue, &cmd, portMAX_DELAY);
-        vTaskDelay(pdMS_TO_TICKS(CLOCKWISE_ROTATE_TIME_MS));
+        vTaskDelay(pdMS_TO_TICKS(COUNTERCLOCKWISE_ROTATE_TIME_MS));
         cmd.direction = DIRECTION_IDLE;
         cmd.duty_cycle = 0;
         xQueueSend(PWM_Queue, &cmd, portMAX_DELAY);
@@ -151,11 +151,11 @@ void Run_Auto_Mode(void)
         break;
     case STATE_AUTO_MOVE_HORIZONTAL_TO_HOME_FROM_UPPER:
         print_str("Moving horizontal to home from upper position\r\n");
-        /* Move Horizontal Arm Counterclockwise */
-        cmd.direction = DIRECTION_COUNTERCLOCKWISE;
-        cmd.duty_cycle = 75;
+        /* Move Horizontal Arm Clockwise */
+        cmd.direction = DIRECTION_CLOCKWISE;
+        cmd.duty_cycle = 30;
         xQueueSend(PWM_Queue, &cmd, portMAX_DELAY);
-        vTaskDelay(pdMS_TO_TICKS(COUNTERCLOCKWISE_ROTATE_TIME_MS));
+        vTaskDelay(pdMS_TO_TICKS(CLOCKWISE_ROTATE_TIME_MS));
         cmd.direction = DIRECTION_IDLE;
         cmd.duty_cycle = 0;
         xQueueSend(PWM_Queue, &cmd, portMAX_DELAY);

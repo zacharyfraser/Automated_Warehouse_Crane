@@ -19,13 +19,13 @@
 #include "L1/PWM_Driver.h"
 #include "Control_Loop.h"
 
-#define PWM_MAX 80.0f  /* Max pulse width adjustment for PWM */
-#define PWM_MIN -80.0f /* Min pulse width adjustment for PWM */
+#define PWM_MAX 35.0f  /* Max pulse width adjustment for PWM */
+#define PWM_MIN -35.0f /* Min pulse width adjustment for PWM */
 #define SETPOINT_MIN_MM 30.0f
-#define SETPOINT_MAX_MM 130.0f
+#define SETPOINT_MAX_MM 140.0f
 
 #define PID_ANTI_WINDUP_LIMIT 50.0f
-#define DEADZONE_MM 2.0f
+#define DEADZONE_MM 4.0f
 
 #define GRAVITY_COMPENSATION 0.7f
 
@@ -39,6 +39,7 @@ typedef struct
     float Kd;
     float previous_error;
     float integral;
+    float output_limit;
 } PID_Controller_t;
 
 extern QueueHandle_t Filtered_Ultrasonic_Queue;
@@ -50,7 +51,7 @@ static int32_t vertical_position_setpoint_mm = STARTUP_SETPOINT_MM;
 static volatile bool control_loop_enabled = false;
 
 PID_Controller_t vertical_pid = {
-    .Kp = 15.0f, .Ki = 0.0f, .Kd = 0.0f, .previous_error = 0.0f, .integral = 0.0f}; /* Proportional only due to non-linearities */
+    .Kp = 10.0f, .Ki = 0.0f, .Kd = 0.0f, .previous_error = 0.0f, .integral = 0.0f}; /* Proportional only due to non-linearities */
 
 static float PID_Compute(PID_Controller_t *pid, float error, float dT);
 
@@ -236,4 +237,12 @@ void Print_PID_Gains(void)
     sprintf(debug_string, "Current PID Gains - Kp: %.2f, Ki: %.2f, Kd: %.2f\r\n",
             vertical_pid.Kp, vertical_pid.Ki, vertical_pid.Kd);
     print_str(debug_string);
+}
+
+/**
+ * @brief Set PID output limits
+ */
+void Set_PID_Output_Limit(float limit)
+{
+    vertical_pid.output_limit = limit;
 }

@@ -121,11 +121,11 @@ void Set_Horizontal_Movement(Horizontal_Direction_t direction)
     switch (direction)
     {
     case DIRECTION_H_CLOCKWISE:
-        cmd.duty_cycle = 80;
+        cmd.duty_cycle = 20;
         cmd.direction = DIRECTION_CLOCKWISE;
         break;
     case DIRECTION_H_COUNTERCLOCKWISE:
-        cmd.duty_cycle = 80;
+        cmd.duty_cycle = 20;
         cmd.direction = DIRECTION_COUNTERCLOCKWISE;
         break;
     case DIRECTION_H_IDLE:
@@ -149,11 +149,11 @@ void Set_Vertical_Movement(Vertical_Direction_t direction)
     switch (direction)
     {
     case DIRECTION_V_UP:
-        cmd.duty_cycle = 80;
+        cmd.duty_cycle = 20;
         cmd.direction = DIRECTION_CLOCKWISE;
         break;
     case DIRECTION_V_DOWN:
-        cmd.duty_cycle = 80;
+        cmd.duty_cycle = 20;
         cmd.direction = DIRECTION_COUNTERCLOCKWISE;
         break;
     case DIRECTION_V_IDLE:

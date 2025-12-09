@@ -16,6 +16,7 @@
 
 #define HOME_POSITION_MM (60)
 #define UPPER_SHELF_POSITION_MM (130)
+#define PWM_MAX (35.0f)
 
 typedef enum Calibrate_States
 {
@@ -28,6 +29,9 @@ typedef enum Calibrate_States
 
 extern EventGroupHandle_t Motor_Event_Group;
 static Calibrate_States_t calibrate_state;
+
+float output_limit = PWM_MAX;
+float max_speed = 0.0f;
 
 /**
  * @brief Reset and initialize calibration mode.
@@ -78,10 +82,16 @@ void Run_Calibrate_Mode(void)
         /* Clear Wait for Motor Event */
         xEventGroupClearBits(Motor_Event_Group, MOTOR_EVENT_BIT);
         print_str("Calibration complete. Entering idle state.\r\n");
+        if (max_speed > 0.8f * PWM_MAX)
+        {
+            output_limit = 0.8f * PWM_MAX;
+        }
+        Set_PID_Output_Limit(output_limit);
         calibrate_state = STATE_CALIBRATE_IDLE;
         break;
     case STATE_CALIBRATE_IDLE:
         /* Calibration complete, remain idle */
+        Set_PID_Output_Limit(output_limit);
         Toggle_PID_Control(false);
         vTaskDelay(pdMS_TO_TICKS(100));
         break;

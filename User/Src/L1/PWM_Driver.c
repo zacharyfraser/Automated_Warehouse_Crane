@@ -16,9 +16,11 @@
 #include "stm32f4xx_hal_tim.h"
 
 #define IDLE_PULSE_WIDTH_US 1500
-#define COUNTERCLOCKWISE_PULSE_WIDTH_US 1553
-#define CLOCKWISE_PULSE_WIDTH_US 1378
-#define KNOCKER_ON_TIME_MS 40
+#define COUNTERCLOCKWISE_PULSE_WIDTH_US 1460
+#define CLOCKWISE_PULSE_WIDTH_US 1530
+#define UP_PULSE_WIDTH_US 1550
+#define DOWN_PULSE_WIDTH_US 1460
+#define KNOCKER_ON_TIME_MS 20
 #define KNOCKER_BASE_MS 100 /* 200 ms base period for 5 Hz minimum knocker duty cycle */
 #define PWM_FRAME_MS 10     /* 50 Hz PWM frame rate */
 
@@ -33,13 +35,15 @@ typedef struct
     uint32_t frame_counter;
     uint8_t state_on;
     uint32_t timer_channel;
+    uint32_t clockwise_pulse;
+    uint32_t counterclockwise_pulse;
 } Servo_t;
 
 static Servo_t servo_horizontal;
 static Servo_t servo_vertical;
 
 static void Servo_Update(Servo_t *servo);
-static void Servo_Init(Servo_t *servo, uint32_t timer_channel);
+static void Servo_Init(Servo_t *servo, uint32_t timer_channel, uint32_t clockwise_pulse, uint32_t counterclockwise_pulse);
 void Set_Servo_Drive(Servo_t *servo, PWM_Direction_t direction, uint16_t duty_cycle);
 
 volatile uint32_t next_pulse_h = IDLE_PULSE_WIDTH_US;
@@ -70,8 +74,8 @@ void PWM_Timer_Task(void *pvParameters)
      */
     PWM_Duty_Cycle_t cmd;
 
-    Servo_Init(&servo_horizontal, TIM_CHANNEL_2);
-    Servo_Init(&servo_vertical, TIM_CHANNEL_1);
+    Servo_Init(&servo_horizontal, TIM_CHANNEL_2, CLOCKWISE_PULSE_WIDTH_US, COUNTERCLOCKWISE_PULSE_WIDTH_US);
+    Servo_Init(&servo_vertical, TIM_CHANNEL_1, UP_PULSE_WIDTH_US, DOWN_PULSE_WIDTH_US);
 
     /* Start timer with update interrupt every rollover (10 ms) */
     HAL_TIM_Base_Start_IT(&htim1);
@@ -127,7 +131,7 @@ static void Servo_Update(Servo_t *servo)
  *
  * @param Servo_t *servo Pointer to servo structure
  */
-static void Servo_Init(Servo_t *servo, uint32_t timer_channel)
+static void Servo_Init(Servo_t *servo, uint32_t timer_channel, uint32_t clockwise_pulse, uint32_t counterclockwise_pulse)
 {
     servo->active_pulse = IDLE_PULSE_WIDTH_US;
     servo->frames_on = KNOCKER_ON_TIME_MS / PWM_FRAME_MS;
@@ -139,6 +143,8 @@ static void Servo_Init(Servo_t *servo, uint32_t timer_channel)
     servo->frame_counter = 0;
     servo->state_on = 1;
     servo->timer_channel = timer_channel;
+    servo->clockwise_pulse = clockwise_pulse;
+    servo->counterclockwise_pulse = counterclockwise_pulse;
 
     /* Start PWM channel */
     __HAL_TIM_SET_COMPARE(&htim1, servo->timer_channel, IDLE_PULSE_WIDTH_US);
@@ -171,11 +177,11 @@ void Set_Servo_Drive(Servo_t *servo, PWM_Direction_t direction, uint16_t duty_cy
     servo->active_pulse = IDLE_PULSE_WIDTH_US;
     if (direction == DIRECTION_CLOCKWISE)
     {
-        servo->active_pulse = CLOCKWISE_PULSE_WIDTH_US;
+        servo->active_pulse = servo->clockwise_pulse;
     }
     else if (direction == DIRECTION_COUNTERCLOCKWISE)
     {
-        servo->active_pulse = COUNTERCLOCKWISE_PULSE_WIDTH_US;
+        servo->active_pulse = servo->counterclockwise_pulse;
     }
 }
 
