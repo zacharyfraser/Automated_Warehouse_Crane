@@ -57,7 +57,7 @@ void Run_Calibrate_Mode(void)
     case STATE_CALIBRATE_MOVE_VERTICAL_TO_HOME:
         print_str("Calibrating: Moving vertical to home position\r\n");
         /* Wait for vertical movement to reach home position */
-        xEventGroupWaitBits(Motor_Event_Group, MOTOR_EVENT_BIT, pdTRUE, pdTRUE, portMAX_DELAY) & MOTOR_EVENT_BIT;
+        xEventGroupWaitBits(Motor_Event_Group, MOTOR_EVENT_BIT, pdTRUE, pdTRUE, portMAX_DELAY);
         Set_Setpoint(UPPER_SHELF_POSITION_MM); /* Move to upper shelf position */
         /* Clear Wait for Motor Event */
         xEventGroupClearBits(Motor_Event_Group, MOTOR_EVENT_BIT);
@@ -65,7 +65,7 @@ void Run_Calibrate_Mode(void)
         break;
     case STATE_CALIBRATE_MOVE_VERTICAL_TO_TOP:
         print_str("Calibrating: Moving vertical to top position\r\n");
-        xEventGroupWaitBits(Motor_Event_Group, MOTOR_EVENT_BIT, pdTRUE, pdTRUE, portMAX_DELAY) & MOTOR_EVENT_BIT;
+        xEventGroupWaitBits(Motor_Event_Group, MOTOR_EVENT_BIT, pdTRUE, pdTRUE, portMAX_DELAY);
         Set_Setpoint(HOME_POSITION_MM); /* Move to bottom position */
         /* Clear Wait for Motor Event */
         xEventGroupClearBits(Motor_Event_Group, MOTOR_EVENT_BIT);
@@ -73,7 +73,7 @@ void Run_Calibrate_Mode(void)
         break;
     case STATE_CALIBRATE_MOVE_VERTICAL_TO_BOTTOM:
         print_str("Calibrating: Moving vertical to bottom position\r\n");
-        xEventGroupWaitBits(Motor_Event_Group, MOTOR_EVENT_BIT, pdTRUE, pdTRUE, portMAX_DELAY) & MOTOR_EVENT_BIT;
+        xEventGroupWaitBits(Motor_Event_Group, MOTOR_EVENT_BIT, pdTRUE, pdTRUE, portMAX_DELAY);
         Set_Setpoint(HOME_POSITION_MM); /* Move to home position */
         /* Clear Wait for Motor Event */
         xEventGroupClearBits(Motor_Event_Group, MOTOR_EVENT_BIT);
